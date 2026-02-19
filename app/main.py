@@ -24,5 +24,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 def read_root():
     return FileResponse("app/static/index.html")
 @app.get("/dashboard-view")
+@app.get("/dashboard")
 def read_dashboard():
     return FileResponse("app/static/dashboard.html")

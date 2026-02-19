@@ -870,6 +870,158 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        /* -- Inline Editing ------------------------------------------------ */
+        .editable-wrap {
+            position: relative;
+        }
+
+        .edit-pencil {
+            opacity: 0;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-left: 5px;
+            transition: opacity 0.15s;
+            display: inline-block;
+        }
+
+        .editable-wrap:hover .edit-pencil {
+            opacity: 1;
+        }
+
+        .vital-chip .edit-pencil {
+            opacity: 0;
+        }
+
+        .vital-chip:hover .edit-pencil {
+            opacity: 1;
+        }
+
+        .field-edit-input {
+            width: 100%;
+            border: 1.5px solid #3b82f6;
+            border-radius: 6px;
+            padding: 4px 7px;
+            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: #1e293b;
+            margin-bottom: 4px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .field-edit-textarea {
+            width: 100%;
+            border: 1.5px solid #3b82f6;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: #1e293b;
+            resize: vertical;
+            min-height: 52px;
+            margin-bottom: 4px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 3px;
+        }
+
+        .edit-save-btn {
+            padding: 3px 10px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .edit-save-btn:hover {
+            background: #2563eb;
+        }
+
+        .edit-cancel-btn {
+            padding: 3px 8px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .edit-cancel-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .add-row-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 6px;
+            background: transparent;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 7px;
+            color: #94a3b8;
+            font-size: 0.78rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+
+        .add-row-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #f0f7ff;
+        }
+
+        .add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 6px;
+        }
+
+        .add-form input,
+        .add-form select {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 0.78rem;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            background: #fff;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .add-form input:focus,
+        .add-form select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .add-form-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .add-form-row>* {
+            flex: 1;
+        }
     </style>
 </head>
 
@@ -1009,43 +1161,157 @@
             showPatient(phone);
         }
 
-        // ── Patient detail ───────────────────────────────────────────────────
+        // -- Patient detail --------------------------------------------------
+        let currentPatientPhone = null;
+        let currentPatientId = null;
+
+        // PATCH top-level patient field
+        async function savePatch(key, val) {
+            const r = await fetch(`/dashboard/patient/${currentPatientId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [key]: val })
+            });
+            return r.ok;
+        }
+
+        // PATCH sub-resource  (insurance, social_history, vitals/1, problems/1 ...)
+        async function saveSubPatch(subPath, payload) {
+            const r = await fetch(`/dashboard/patient/${currentPatientId}/${subPath}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            return r.ok;
+        }
+
+        // POST new sub-record
+        async function addRecord(subPath, payload) {
+            const r = await fetch(`/dashboard/patient/${currentPatientId}/${subPath}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            return r.ok ? r.json() : null;
+        }
+
+        // -- Generic field card (top-level demographics) --
+        function editableCard(label, value, patchKey, { multiline = false, selectOpts = null } = {}) {
+            const disp = value || '&mdash;';
+            const inputHtml = selectOpts
+                ? `<select class="field-edit-input" id="ei_${patchKey}">${selectOpts.map(o => `<option value="${o}"${o === value ? ' selected' : ''}>${o}</option>`).join('')}</select>`
+                : multiline
+                    ? `<textarea class="field-edit-textarea" id="ei_${patchKey}">${value || ''}</textarea>`
+                    : `<input class="field-edit-input" id="ei_${patchKey}" value="${(value || '').replace(/"/g, '&quot;')}">`;
+            return `<div class="demo-card editable-wrap">
+                <div class="demo-label">${label}</div>
+                <div class="demo-value" id="ed_${patchKey}">${disp}&nbsp;<span class="edit-pencil" onclick="beginEdit('${patchKey}')">&#9998;</span></div>
+                <div id="eform_${patchKey}" style="display:none">
+                    ${inputHtml}
+                    <div class="edit-actions">
+                        <button class="edit-save-btn" onclick="commitEdit('${patchKey}')">&#10003; Save</button>
+                        <button class="edit-cancel-btn" onclick="cancelEdit('${patchKey}')">&#10005;</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function beginEdit(key) {
+            document.getElementById(`ed_${key}`).style.display = 'none';
+            document.getElementById(`eform_${key}`).style.display = 'block';
+            const inp = document.getElementById(`ei_${key}`);
+            if (inp) { inp.focus(); try { inp.select(); } catch (e) { } }
+        }
+        async function commitEdit(key) {
+            const inp = document.getElementById(`ei_${key}`);
+            const newVal = inp ? inp.value : '';
+            if (!await savePatch(key, newVal)) { alert('Save failed.'); return; }
+            const dispEl = document.getElementById(`ed_${key}`);
+            dispEl.innerHTML = (newVal || '&mdash;') + `&nbsp;<span class="edit-pencil" onclick="beginEdit('${key}')">&#9998;</span>`;
+            dispEl.style.display = '';
+            document.getElementById(`eform_${key}`).style.display = 'none';
+        }
+        function cancelEdit(key) {
+            document.getElementById(`ed_${key}`).style.display = '';
+            document.getElementById(`eform_${key}`).style.display = 'none';
+        }
+
+        // -- Sub-resource card (insurance / social_history) --
+        function editableSubCard(label, value, subPath, fieldKey) {
+            const k = `${subPath}_${fieldKey}`;
+            const disp = value || '&mdash;';
+            return `<div class="demo-card editable-wrap">
+                <div class="demo-label">${label}</div>
+                <div class="demo-value" id="sed_${k}">${disp}&nbsp;<span class="edit-pencil" onclick="beginSubEdit('${k}')">&#9998;</span></div>
+                <div id="seform_${k}" style="display:none">
+                    <input class="field-edit-input" id="sei_${k}" value="${(value || '').replace(/"/g, '&quot;')}">
+                    <div class="edit-actions">
+                        <button class="edit-save-btn" onclick="commitSubEdit('${subPath}','${fieldKey}','${k}')">&#10003; Save</button>
+                        <button class="edit-cancel-btn" onclick="cancelSubEdit('${k}')">&#10005;</button>
+                    </div>
+                </div>
+            </div>`;
+        }
+        function beginSubEdit(k) {
+            document.getElementById(`sed_${k}`).style.display = 'none';
+            document.getElementById(`seform_${k}`).style.display = 'block';
+            const inp = document.getElementById(`sei_${k}`);
+            if (inp) { inp.focus(); inp.select(); }
+        }
+        async function commitSubEdit(subPath, fieldKey, k) {
+            const newVal = document.getElementById(`sei_${k}`).value;
+            if (!await saveSubPatch(subPath, { [fieldKey]: newVal })) { alert('Save failed.'); return; }
+            const el = document.getElementById(`sed_${k}`);
+            el.innerHTML = (newVal || '&mdash;') + `&nbsp;<span class="edit-pencil" onclick="beginSubEdit('${k}')">&#9998;</span>`;
+            el.style.display = '';
+            document.getElementById(`seform_${k}`).style.display = 'none';
+        }
+        function cancelSubEdit(k) {
+            document.getElementById(`sed_${k}`).style.display = '';
+            document.getElementById(`seform_${k}`).style.display = 'none';
+        }
+
         async function showPatient(phone) {
             const res = await fetch(`/dashboard/patient/${phone}`);
             if (!res.ok) return;
-            const p = await res.json();
+            const rawJson = await res.text();
+            _lastPatientJson = rawJson;          // baseline for live-refresh diff
+            const p = JSON.parse(rawJson);
+            currentPatientPhone = phone;
+            currentPatientId = p.id;
+
             const panel = document.getElementById('patientPanel');
             const color = avColor(p.first_name + p.last_name);
 
             // Demographics
-            const demoCards = [
-                { label: 'DOB', value: safe(p.dob) },
-                { label: 'Gender', value: safe(p.gender) },
-                { label: 'Marital Status', value: safe(p.marital_status) },
-                { label: 'Pharmacy', value: safe(p.preferred_pharmacy) },
-                { label: 'Address', value: safe(p.address) },
-                { label: 'Emergency Contact', value: p.emergency_contact_name ? `${p.emergency_contact_name} (${p.emergency_contact_relation || '?'})<br>${p.emergency_contact_phone || ''}` : '—' },
-            ];
-            const demoHtml = `<div class="demo-grid">${demoCards.map(d => `<div class="demo-card"><div class="demo-label">${d.label}</div><div class="demo-value">${d.value}</div></div>`).join('')}</div>`;
+            const demoHtml = `<div class="demo-grid">
+                ${editableCard('DOB', p.dob, 'dob')}
+                ${editableCard('Gender', p.gender, 'gender', { selectOpts: ['Male', 'Female', 'Non-binary', 'Other', 'Prefer not to say'] })}
+                ${editableCard('Marital Status', p.marital_status, 'marital_status', { selectOpts: ['Single', 'Married', 'Divorced', 'Widowed', 'Separated'] })}
+                ${editableCard('Pharmacy', p.preferred_pharmacy, 'preferred_pharmacy')}
+                ${editableCard('Address', p.address, 'address')}
+                ${editableCard('Emerg. Contact', p.emergency_contact_name, 'emergency_contact_name')}
+                ${editableCard('Emerg. Relation', p.emergency_contact_relation, 'emergency_contact_relation')}
+                ${editableCard('Emerg. Phone', p.emergency_contact_phone, 'emergency_contact_phone')}
+            </div>`;
 
-            const insHtml = p.insurance ? `<div class="demo-card" style="margin-top:6px"><div class="demo-label">Insurance</div><div class="demo-value"><strong>${p.insurance.provider}</strong> · ${p.insurance.plan_type}<br><span style="color:#94a3b8;font-size:0.76rem">${p.insurance.policy_number}</span></div></div>` : '';
+            // Insurance
+            const insHtml = p.insurance ? `
+                <div class="section-title" style="margin-top:12px">Insurance</div>
+                <div class="demo-grid">
+                    ${editableSubCard('Provider', p.insurance.provider, 'insurance', 'provider')}
+                    ${editableSubCard('Plan Type', p.insurance.plan_type, 'insurance', 'plan_type')}
+                    ${editableSubCard('Policy #', p.insurance.policy_number, 'insurance', 'policy_number')}
+                </div>` : '';
 
-            // Vitals — color-coded by status
+            // Vitals
             function vitalStatus(type, val) {
-                const v = parseFloat(val);
-                const t = type.toLowerCase();
-                if (t.includes('heart') || t.includes('pulse')) {
-                    if (v < 60 || v > 100) return v > 110 || v < 50 ? 'critical' : 'warning';
-                } else if (t.includes('systolic') || t === 'blood pressure') {
-                    if (v >= 130) return v >= 160 ? 'critical' : 'warning';
-                } else if (t.includes('temp')) {
-                    if (v > 99.5) return v > 101 ? 'critical' : 'warning';
-                    if (v < 97) return 'warning';
-                } else if (t.includes('o2') || t.includes('oxygen') || t.includes('sat')) {
-                    if (v < 95) return v < 90 ? 'critical' : 'warning';
-                } else if (t.includes('glucose') || t.includes('blood sugar')) {
-                    if (v > 180 || v < 70) return v > 250 || v < 55 ? 'critical' : 'warning';
-                }
+                const v = parseFloat(val); const t = type.toLowerCase();
+                if (t.includes('heart') || t.includes('pulse')) { if (v < 60 || v > 100) return v > 110 || v < 50 ? 'critical' : 'warning'; }
+                else if (t.includes('systolic') || t === 'blood pressure') { if (v >= 130) return v >= 160 ? 'critical' : 'warning'; }
+                else if (t.includes('temp')) { if (v > 99.5) return v > 101 ? 'critical' : 'warning'; if (v < 97) return 'warning'; }
+                else if (t.includes('o2') || t.includes('oxygen') || t.includes('sat')) { if (v < 95) return v < 90 ? 'critical' : 'warning'; }
+                else if (t.includes('glucose') || t.includes('blood sugar')) { if (v > 180 || v < 70) return v > 250 || v < 55 ? 'critical' : 'warning'; }
                 return 'normal';
             }
             const vitalColors = {
@@ -1055,36 +1321,129 @@
             };
             const vitalsHtml = p.vitals && p.vitals.length
                 ? `<div class="vitals-row">${p.vitals.slice(0, 8).map(v => {
-                    const st = vitalStatus(v.type, v.value);
-                    const c = vitalColors[st];
-                    return `<div class="vital-chip" style="background:${c.bg};border-color:${c.border}">
+                    const st = vitalStatus(v.type, v.value); const c = vitalColors[st];
+                    return `<div class="vital-chip editable-wrap" style="background:${c.bg};border-color:${c.border}">
                         <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
                             <div style="width:6px;height:6px;border-radius:50%;background:${c.dot};flex-shrink:0"></div>
                             <div class="vital-type" style="color:${c.text}">${v.type}</div>
                         </div>
-                        <div><span class="vital-value" style="color:${c.text}">${v.value}</span><span class="vital-unit" style="color:${c.dot}">${v.unit}</span></div>
+                        <div id="vdisp_${v.id}">
+                            <span class="vital-value" style="color:${c.text}">${v.value}</span><span class="vital-unit" style="color:${c.dot}">${v.unit}</span>
+                            <span class="edit-pencil" onclick="beginVitalEdit(${v.id})">&#9998;</span>
+                        </div>
+                        <div id="veform_${v.id}" style="display:none">
+                            <input class="field-edit-input" id="vval_${v.id}" value="${v.value}" placeholder="Value">
+                            <input class="field-edit-input" id="vunit_${v.id}" value="${v.unit}" placeholder="Unit">
+                            <div class="edit-actions">
+                                <button class="edit-save-btn" onclick="commitVitalEdit(${v.id},'${v.type}')">&#10003;</button>
+                                <button class="edit-cancel-btn" onclick="cancelVitalEdit(${v.id})">&#10005;</button>
+                            </div>
+                        </div>
                     </div>`;
                 }).join('')}</div>`
                 : '<div class="empty-state">No vitals recorded.</div>';
 
-            // Allergies & history
-            const allergyHtml = `<div class="allergy-card"><div class="allergy-label">⚠ Allergies</div><div class="allergy-value">${safe(p.allergies_summary)}</div></div>
-                <div class="demo-card"><div class="demo-label">Medical History</div><div class="demo-value">${safe(p.medical_history_summary)}</div></div>
-                ${p.social_history ? `<div class="demo-card" style="margin-top:6px"><div class="demo-label">Social History</div><div class="demo-value">🚬 ${p.social_history.smoking_status} · 🍷 ${p.social_history.alcohol_use}<br>💼 ${p.social_history.occupation}</div></div>` : ''}`;
+            // Allergies & History
+            const allergyHtml = `
+                <div class="allergy-card editable-wrap">
+                    <div class="allergy-label">&#9888; Allergies</div>
+                    <div class="allergy-value" id="ed_allergies_summary">${safe(p.allergies_summary)}&nbsp;<span class="edit-pencil" onclick="beginEdit('allergies_summary')">&#9998;</span></div>
+                    <div id="eform_allergies_summary" style="display:none">
+                        <textarea class="field-edit-textarea" id="ei_allergies_summary">${p.allergies_summary || ''}</textarea>
+                        <div class="edit-actions">
+                            <button class="edit-save-btn" onclick="commitEdit('allergies_summary')">&#10003; Save</button>
+                            <button class="edit-cancel-btn" onclick="cancelEdit('allergies_summary')">&#10005;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-card editable-wrap" style="margin-top:6px">
+                    <div class="demo-label">Medical History</div>
+                    <div class="demo-value" id="ed_medical_history_summary">${safe(p.medical_history_summary)}&nbsp;<span class="edit-pencil" onclick="beginEdit('medical_history_summary')">&#9998;</span></div>
+                    <div id="eform_medical_history_summary" style="display:none">
+                        <textarea class="field-edit-textarea" id="ei_medical_history_summary">${p.medical_history_summary || ''}</textarea>
+                        <div class="edit-actions">
+                            <button class="edit-save-btn" onclick="commitEdit('medical_history_summary')">&#10003; Save</button>
+                            <button class="edit-cancel-btn" onclick="cancelEdit('medical_history_summary')">&#10005;</button>
+                        </div>
+                    </div>
+                </div>
+                ${p.social_history ? `<div class="demo-card" style="margin-top:6px">
+                    <div class="demo-label">Social History</div>
+                    <div class="demo-grid" style="margin-top:4px">
+                        ${editableSubCard('Smoking', p.social_history.smoking_status, 'social_history', 'smoking_status')}
+                        ${editableSubCard('Alcohol', p.social_history.alcohol_use, 'social_history', 'alcohol_use')}
+                        ${editableSubCard('Occupation', p.social_history.occupation, 'social_history', 'occupation')}
+                    </div>
+                </div>` : ''}`;
 
-            // Problems
-            const problemsHtml = p.problems && p.problems.length ? p.problems.map(pr => `<div class="problem-item"><div class="prob-dot" style="background:${pr.status === 'Active' ? '#10b981' : '#94a3b8'}"></div><span class="prob-name">${pr.name}</span><span class="tag ${pr.status === 'Active' ? 'tag-success' : 'tag-neutral'}">${pr.status}</span><span class="prob-date">${pr.date_diagnosed || ''}</span></div>`).join('') : '<div class="empty-state">No problems recorded.</div>';
+            // Problems builder
+            function buildProblemsHtml(problems) {
+                if (!problems || !problems.length) return '<div class="empty-state">No problems recorded.</div>';
+                return problems.map(pr => `
+                    <div class="problem-item editable-wrap" id="prob_${pr.id}">
+                        <div class="prob-dot" style="background:${pr.status === 'Active' ? '#10b981' : '#94a3b8'}"></div>
+                        <span class="prob-name" id="pname_${pr.id}">${pr.name}</span>
+                        <span class="tag ${pr.status === 'Active' ? 'tag-success' : 'tag-neutral'}" id="pstatus_${pr.id}">${pr.status}</span>
+                        <span class="prob-date" id="pdate_${pr.id}">${pr.date_diagnosed || ''}</span>
+                        <span class="edit-pencil" onclick="beginProblemEdit(${pr.id})">&#9998;</span>
+                    </div>
+                    <div id="peform_${pr.id}" style="display:none;padding:6px 0">
+                        <input class="field-edit-input" id="pname_inp_${pr.id}" value="${pr.name.replace(/"/g, '&quot;')}" placeholder="Diagnosis" style="margin-bottom:3px">
+                        <div class="add-form-row">
+                            <select class="field-edit-input" id="pstatus_inp_${pr.id}">
+                                <option${pr.status === 'Active' ? ' selected' : ''}>Active</option>
+                                <option${pr.status === 'Resolved' ? ' selected' : ''}>Resolved</option>
+                            </select>
+                            <input class="field-edit-input" id="pdate_inp_${pr.id}" value="${pr.date_diagnosed || ''}" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div class="edit-actions">
+                            <button class="edit-save-btn" onclick="commitProblemEdit(${pr.id})">&#10003; Save</button>
+                            <button class="edit-cancel-btn" onclick="document.getElementById('peform_${pr.id}').style.display='none'">&#10005;</button>
+                        </div>
+                    </div>`).join('');
+            }
 
-            // Meds
-            const medsHtml = p.medications && p.medications.length ? `<table class="mini-table"><thead><tr><th>Drug</th><th>Dose</th><th>Freq</th></tr></thead><tbody>${p.medications.map(m => `<tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">No medications.</div>';
+            // Medications builder
+            function buildMedsHtml(meds) {
+                if (!meds || !meds.length) return '<div class="empty-state">No medications.</div>';
+                return `<table class="mini-table"><thead><tr><th>Drug</th><th>Dose</th><th>Freq</th><th></th></tr></thead><tbody>
+                    ${meds.map(m => `
+                    <tr id="med_${m.id}">
+                        <td id="mname_${m.id}">${m.name}</td>
+                        <td id="mdose_${m.id}">${m.dosage}</td>
+                        <td id="mfreq_${m.id}">${m.frequency}</td>
+                        <td><span style="cursor:pointer;font-size:0.8rem" onclick="beginMedEdit(${m.id})">&#9998;</span></td>
+                    </tr>
+                    <tr id="meform_${m.id}" style="display:none"><td colspan="4">
+                        <div class="add-form-row" style="margin-bottom:3px">
+                            <input class="field-edit-input" id="mname_inp_${m.id}" value="${m.name.replace(/"/g, '&quot;')}" placeholder="Drug">
+                            <input class="field-edit-input" id="mdose_inp_${m.id}" value="${m.dosage.replace(/"/g, '&quot;')}" placeholder="Dose">
+                        </div>
+                        <div class="add-form-row">
+                            <input class="field-edit-input" id="mfreq_inp_${m.id}" value="${m.frequency.replace(/"/g, '&quot;')}" placeholder="Freq">
+                            <input class="field-edit-input" id="mprescribed_inp_${m.id}" value="${(m.prescribed_by || '').replace(/"/g, '&quot;')}" placeholder="Prescribed by">
+                        </div>
+                        <div class="edit-actions">
+                            <button class="edit-save-btn" onclick="commitMedEdit(${m.id})">&#10003; Save</button>
+                            <button class="edit-cancel-btn" onclick="document.getElementById('meform_${m.id}').style.display='none'">&#10005;</button>
+                        </div>
+                    </td></tr>`).join('')}
+                </tbody></table>`;
+            }
 
             // Labs
             const tagCls = i => i === 'High' ? 'tag-danger' : i === 'Low' ? 'tag-warning' : 'tag-success';
-            const labsHtml = p.results && p.results.length ? `<table class="mini-table"><thead><tr><th>Test</th><th>Value</th><th>Status</th></tr></thead><tbody>${p.results.map(r => `<tr><td>${r.test_name}</td><td>${r.value} ${r.unit}</td><td><span class="tag ${tagCls(r.interpretation)}">${r.interpretation}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">No lab results.</div>';
+            const labsHtml = p.results && p.results.length
+                ? `<table class="mini-table"><thead><tr><th>Test</th><th>Value</th><th>Status</th></tr></thead><tbody>
+                    ${p.results.map(r => `<tr><td>${r.test_name}</td><td>${r.value} ${r.unit}</td><td><span class="tag ${tagCls(r.interpretation)}">${r.interpretation}</span></td></tr>`).join('')}
+                  </tbody></table>`
+                : '<div class="empty-state">No lab results.</div>';
 
             // Appointments
             const active = p.appointments ? p.appointments.filter(a => a.status !== 'Cancelled') : [];
-            const apptHtml = active.length ? active.map(a => `<div class="appt-card"><div><div class="appt-date">${new Date(a.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</div><div class="appt-info">${a.reason} · ${a.doctor_name}</div></div><span class="tag ${a.status === 'Scheduled' ? 'tag-success' : 'tag-neutral'}">${a.status}</span></div>`).join('') : '<div class="empty-state">No upcoming appointments.</div>';
+            const apptHtml = active.length
+                ? active.map(a => `<div class="appt-card"><div><div class="appt-date">${new Date(a.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</div><div class="appt-info">${a.reason} &middot; ${a.doctor_name}</div></div><span class="tag ${a.status === 'Scheduled' ? 'tag-success' : 'tag-neutral'}">${a.status}</span></div>`).join('')
+                : '<div class="empty-state">No upcoming appointments.</div>';
 
             panel.innerHTML = `
                 <div class="panel-header">
@@ -1092,13 +1451,14 @@
                         <div class="panel-avatar" style="background:${color}">${initials(p.first_name, p.last_name)}</div>
                         <div>
                             <div class="panel-patient-name">${p.first_name} ${p.last_name}</div>
-                            <div class="panel-patient-id">MRN #${p.id || '—'} · ${p.phone_number}</div>
+                            <div class="panel-patient-id">MRN #${p.id} &middot; ${p.phone_number}</div>
                         </div>
                     </div>
                 </div>
                 <div class="panel-body">
                     <div class="section-title">Demographics</div>
-                    ${demoHtml}${insHtml}
+                    ${demoHtml}
+                    ${insHtml}
 
                     <div class="section-title">Clinical Snapshot</div>
                     ${allergyHtml}
@@ -1113,23 +1473,131 @@
                         <button class="tab-btn" onclick="switchPanelTab(this,'labs')">Labs</button>
                         <button class="tab-btn" onclick="switchPanelTab(this,'appts')">Appts</button>
                     </div>
-                    <div id="tabProblems" class="tab-pane active">${problemsHtml}</div>
-                    <div id="tabMeds" class="tab-pane">${medsHtml}</div>
+                    <div id="tabProblems" class="tab-pane active">
+                        ${buildProblemsHtml(p.problems)}
+                        <button class="add-row-btn" onclick="showAddProblemForm()">+ Add Problem</button>
+                        <div id="addProblemForm" style="display:none" class="add-form">
+                            <input id="npName" placeholder="Diagnosis name">
+                            <div class="add-form-row">
+                                <select id="npStatus"><option>Active</option><option>Resolved</option></select>
+                                <input id="npDate" placeholder="YYYY-MM-DD">
+                            </div>
+                            <div class="edit-actions">
+                                <button class="edit-save-btn" onclick="submitNewProblem()">+ Add</button>
+                                <button class="edit-cancel-btn" onclick="document.getElementById('addProblemForm').style.display='none'">&#10005;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tabMeds" class="tab-pane">
+                        <div id="medsTableWrap">${buildMedsHtml(p.medications)}</div>
+                        <button class="add-row-btn" onclick="showAddMedForm()">+ Add Medication</button>
+                        <div id="addMedForm" style="display:none" class="add-form">
+                            <div class="add-form-row">
+                                <input id="nmName" placeholder="Drug name">
+                                <input id="nmDose" placeholder="Dosage">
+                            </div>
+                            <div class="add-form-row">
+                                <input id="nmFreq" placeholder="Frequency">
+                                <input id="nmPrescribed" placeholder="Prescribed by">
+                            </div>
+                            <div class="edit-actions">
+                                <button class="edit-save-btn" onclick="submitNewMed()">+ Add</button>
+                                <button class="edit-cancel-btn" onclick="document.getElementById('addMedForm').style.display='none'">&#10005;</button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="tabLabs" class="tab-pane">${labsHtml}</div>
                     <div id="tabAppts" class="tab-pane">${apptHtml}</div>
 
                     <div class="msg-section-header">
-                        <div class="msg-section-title">✉ Messages</div>
+                        <div class="msg-section-title">&#9993; Messages</div>
                         <div class="msg-section-subtitle">Doctor-patient secure channel</div>
                     </div>
-                    <div id="msgThread" class="msg-thread"><div class="empty-state">Loading messages…</div></div>
+                    <div id="msgThread" class="msg-thread"><div class="empty-state">Loading messages...</div></div>
                     <div class="msg-compose">
                         <input id="msgSubject" class="msg-subject-input" placeholder="Subject (optional)">
-                        <textarea id="msgBody" class="msg-body-input" rows="3" placeholder="Write a message to the patient…"></textarea>
+                        <textarea id="msgBody" class="msg-body-input" rows="3" placeholder="Write a message to the patient..."></textarea>
                         <button class="msg-send-btn" id="msgSendBtn" onclick="sendMessage('${p.phone_number}')">Send Message</button>
                     </div>
                 </div>`;
             loadMessages(p.phone_number);
+        }
+
+        // -- Vital edit handlers --
+        function beginVitalEdit(id) {
+            document.getElementById(`vdisp_${id}`).style.display = 'none';
+            document.getElementById(`veform_${id}`).style.display = 'block';
+        }
+        function cancelVitalEdit(id) {
+            document.getElementById(`vdisp_${id}`).style.display = '';
+            document.getElementById(`veform_${id}`).style.display = 'none';
+        }
+        async function commitVitalEdit(id, type) {
+            const val = document.getElementById(`vval_${id}`).value;
+            const unit = document.getElementById(`vunit_${id}`).value;
+            if (!await saveSubPatch(`vitals/${id}`, { type, value: val, unit })) { alert('Save failed.'); return; }
+            const wrap = document.getElementById(`vdisp_${id}`);
+            wrap.innerHTML = `<span class="vital-value">${val}</span><span class="vital-unit">${unit}</span>&nbsp;<span class="edit-pencil" onclick="beginVitalEdit(${id})">&#9998;</span>`;
+            wrap.style.display = '';
+            document.getElementById(`veform_${id}`).style.display = 'none';
+        }
+
+        // -- Problem edit handlers --
+        function beginProblemEdit(id) { document.getElementById(`peform_${id}`).style.display = 'block'; }
+        async function commitProblemEdit(id) {
+            const name = document.getElementById(`pname_inp_${id}`).value;
+            const status = document.getElementById(`pstatus_inp_${id}`).value;
+            const date = document.getElementById(`pdate_inp_${id}`).value;
+            if (!await saveSubPatch(`problems/${id}`, { name, status, date_diagnosed: date })) { alert('Save failed.'); return; }
+            document.getElementById(`pname_${id}`).textContent = name;
+            document.getElementById(`pstatus_${id}`).textContent = status;
+            document.getElementById(`pstatus_${id}`).className = `tag ${status === 'Active' ? 'tag-success' : 'tag-neutral'}`;
+            document.getElementById(`pdate_${id}`).textContent = date;
+            document.getElementById(`peform_${id}`).style.display = 'none';
+        }
+        function showAddProblemForm() {
+            document.getElementById('addProblemForm').style.display = 'flex';
+            document.getElementById('npName').focus();
+        }
+        async function submitNewProblem() {
+            const name = document.getElementById('npName').value.trim();
+            const status = document.getElementById('npStatus').value;
+            const date = document.getElementById('npDate').value.trim();
+            if (!name) return;
+            const rec = await addRecord('problems', { name, status, date_diagnosed: date || null });
+            if (rec) { await showPatient(currentPatientPhone); }
+            else { alert('Failed to add problem.'); }
+        }
+
+        // -- Medication edit handlers --
+        function beginMedEdit(id) { document.getElementById(`meform_${id}`).style.display = 'table-row'; }
+        async function commitMedEdit(id) {
+            const name = document.getElementById(`mname_inp_${id}`).value;
+            const dosage = document.getElementById(`mdose_inp_${id}`).value;
+            const frequency = document.getElementById(`mfreq_inp_${id}`).value;
+            const prescribed_by = document.getElementById(`mprescribed_inp_${id}`).value;
+            if (!await saveSubPatch(`medications/${id}`, { name, dosage, frequency, prescribed_by })) { alert('Save failed.'); return; }
+            document.getElementById(`mname_${id}`).textContent = name;
+            document.getElementById(`mdose_${id}`).textContent = dosage;
+            document.getElementById(`mfreq_${id}`).textContent = frequency;
+            document.getElementById(`meform_${id}`).style.display = 'none';
+        }
+        function showAddMedForm() {
+            document.getElementById('addMedForm').style.display = 'flex';
+            document.getElementById('nmName').focus();
+        }
+        async function submitNewMed() {
+            const name = document.getElementById('nmName').value.trim();
+            const dosage = document.getElementById('nmDose').value.trim();
+            const frequency = document.getElementById('nmFreq').value.trim();
+            const prescribed_by = document.getElementById('nmPrescribed').value.trim();
+            if (!name || !dosage || !frequency) return;
+            const rec = await addRecord('medications', { name, dosage, frequency, prescribed_by: prescribed_by || null });
+            if (rec) {
+                await showPatient(currentPatientPhone);
+                const tabs = document.querySelectorAll('.tab-btn');
+                if (tabs[1]) switchPanelTab(tabs[1], 'meds');
+            } else { alert('Failed to add medication.'); }
         }
 
         function switchPanelTab(btn, tab) {
@@ -1140,31 +1608,20 @@
             document.getElementById(map[tab]).classList.add('active');
         }
 
-        // ── Messaging ───────────────────────────────────────────────────────
+        // -- Messaging --
         async function loadMessages(phone) {
             try {
                 const msgs = await fetch(`/dashboard/messages/${phone}`).then(r => r.json());
                 const thread = document.getElementById('msgThread');
                 if (!thread) return;
-                if (!msgs.length) { thread.innerHTML = '<div class="empty-state">No messages yet. Send the first one below.</div>'; return; }
-                // Sort oldest-first for display
+                if (!msgs.length) { thread.innerHTML = '<div class="empty-state">No messages yet.</div>'; return; }
                 const sorted = [...msgs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                const hasUnread = sorted.some(m => m.sender_role === 'patient' && !m.is_read);
-                const msgsTabBtn = document.getElementById('msgsTabBtn');
-                if (msgsTabBtn && hasUnread) {
-                    if (!msgsTabBtn.querySelector('.unread-dot')) {
-                        msgsTabBtn.insertAdjacentHTML('beforeend', '<span class="unread-dot"></span>');
-                    }
-                }
                 thread.innerHTML = sorted.map(m => {
                     const cls = m.sender_role;
                     const subj = m.subject ? `<div class="msg-subject">${m.subject}</div>` : '';
                     const ts = new Date(m.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    const unreadBadge = (m.sender_role === 'patient' && !m.is_read) ? ' · <span style="color:#ef4444;font-weight:700">Unread</span>' : '';
-                    return `<div class="msg-bubble-wrap ${cls}">
-                        <div class="msg-bubble">${subj}${m.body}</div>
-                        <div class="msg-meta">${m.sender_name} · ${ts}${unreadBadge}</div>
-                    </div>`;
+                    const unread = (m.sender_role === 'patient' && !m.is_read) ? ' &middot; <span style="color:#ef4444;font-weight:700">Unread</span>' : '';
+                    return `<div class="msg-bubble-wrap ${cls}"><div class="msg-bubble">${subj}${m.body}</div><div class="msg-meta">${m.sender_name} &middot; ${ts}${unread}</div></div>`;
                 }).join('');
                 thread.scrollTop = thread.scrollHeight;
             } catch (e) { console.error(e); }
@@ -1175,8 +1632,7 @@
             const body = document.getElementById('msgBody').value.trim();
             if (!body) return;
             const btn = document.getElementById('msgSendBtn');
-            btn.disabled = true;
-            btn.textContent = 'Sending…';
+            btn.disabled = true; btn.textContent = 'Sending...';
             try {
                 await fetch(`/dashboard/messages/${phone}`, {
                     method: 'POST',
@@ -1187,14 +1643,43 @@
                 document.getElementById('msgBody').value = '';
                 await loadMessages(phone);
             } catch (e) { console.error(e); }
-            btn.disabled = false;
-            btn.textContent = 'Send Message';
+            btn.disabled = false; btn.textContent = 'Send Message';
         }
 
-        // ── Init ────────────────────────────────────────────────────────────
+        // -- Live patient refresh (reflects CliniCall updates without a page reload) --
+        let _lastPatientJson = null;
+        let _liveRefreshActive = false;
+
+        async function liveRefreshPatient() {
+            if (!currentPatientPhone || _liveRefreshActive) return;
+            _liveRefreshActive = true;
+            try {
+                const res = await fetch(`/dashboard/patient/${currentPatientPhone}`);
+                if (!res.ok) return;
+                const json = await res.text();
+                if (json === _lastPatientJson) return;   // nothing changed
+                _lastPatientJson = json;
+
+                // Remember which tab is open so we can restore it
+                const activeTab = document.querySelector('.tab-btn.active');
+                const activeTabName = activeTab ? activeTab.textContent.trim().toLowerCase() : 'problems';
+
+                await showPatient(currentPatientPhone);
+
+                // Restore the previously-active tab after re-render
+                const tabMap = { problems: 0, meds: 1, labs: 2, appts: 3 };
+                const idx = tabMap[activeTabName] ?? 0;
+                const btns = document.querySelectorAll('.tab-btn');
+                if (btns[idx]) switchPanelTab(btns[idx], activeTabName);
+            } catch (e) { /* ignore network hiccups */ }
+            finally { _liveRefreshActive = false; }
+        }
+
+        // -- Init --
         fetchPatients();
         fetchLogs();
         setInterval(fetchLogs, 5000);
+        setInterval(liveRefreshPatient, 2000);   // live patient sync every 2 s
     </script>
 </body>
 
