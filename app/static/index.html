@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CliniCall Phone</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#1c1c1e">
     <link
         href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap"
         rel="stylesheet">
@@ -315,6 +317,69 @@
             }
         }
     </style>
+    <style>
+        /* Mobile Override (Responsive) */
+        @media (max-width: 768px) {
+            body {
+                background: #000;
+                display: block !important;
+                /* Ensure full width */
+                margin: 0;
+                padding: 0;
+                width: 100% !important;
+                height: 100dvh;
+                overflow: hidden;
+            }
+
+            .phone {
+                width: 100% !important;
+                height: 100% !important;
+                border: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                background: #000 !important;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .notch,
+            .status-bar {
+                display: none !important;
+            }
+
+            /* GLOBAL VIEW RESET */
+            .view {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+                padding-left: 20px !important;
+                /* Ensure generic padding */
+                padding-right: 20px !important;
+                /* Reset top padding to handle per-view */
+                padding-top: 0 !important;
+            }
+
+            /* CONTACT VIEW: More top margin */
+            .contact-view {
+                padding-top: calc(env(safe-area-inset-top, 24px) + 80px) !important;
+                justify-content: flex-start !important;
+                /* Align to top */
+            }
+
+            /* CALL VIEW: Less top margin */
+            .call-view {
+                padding-top: calc(env(safe-area-inset-top, 24px) + 20px) !important;
+                background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%) !important;
+                justify-content: flex-start !important;
+            }
+
+            /* Adjust Call Info to not be centered vertically if we want it higher */
+            .call-info {
+                justify-content: flex-start !important;
+                padding-top: 40px !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -480,6 +545,14 @@
             recognition.interimResults = true;
             recognition.lang = 'en-US';
 
+            // Log Errors explicitly
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                if (event.error === 'not-allowed') {
+                    alert("Microphone access blocked. Please allow permissions in site settings.");
+                }
+            };
+
             recognition.onstart = () => { isListening = true; };
             recognition.onend = () => {
                 isListening = false;
@@ -499,6 +572,14 @@
             isCallActive = true;
             viewContact.classList.remove('active');
             viewCall.classList.add('active');
+
+            // PRIMING: Start recognition immediately on user gesture to prompt permission
+            try {
+                recognition.start();
+                console.log("Mic primed via user gesture.");
+            } catch (e) {
+                console.warn("Mic prime skipped (already active?):", e);
+            }
 
             // Reset state
             callDuration = 0;
@@ -657,6 +738,8 @@
             // Visual hooks for the phone UI & Turn-Taking release
             utt.onstart = () => {
                 isSpeaking = true;
+                // Stop recognition to prevent echo/feedback while AI speaks
+                try { recognition.stop(); } catch (e) { }
                 activityRing.style.animation = 'pulseRing 1s infinite';
                 activityRing.style.opacity = 1;
             };
@@ -673,6 +756,17 @@
             };
 
             window.speechSynthesis.speak(utt);
+        }
+    </script>
+
+    <script>
+        // Register Service Worker (PWA requirement for APK generation)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.warn('SW registration failed:', err));
+            });
         }
     </script>
 </body>
