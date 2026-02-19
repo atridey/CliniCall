@@ -205,3 +205,55 @@ def get_patient_details(phone_number: str, db: Session = Depends(get_db)):
             ) for a in patient.appointments
         ]
     )
+
+# ── Messages ────────────────────────────────────────────────────────────────
+
+from ..models import Message
+
+class MessageView(BaseModel):
+    id: int
+    sender_role: str
+    sender_name: str
+    subject: str | None
+    body: str
+    is_read: bool
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+class MessageCreate(BaseModel):
+    sender_name: str  # Doctor's name, supplied by the front-end
+    subject: str | None = None
+    body: str
+
+@router.get("/messages/{phone_number}", response_model=list[MessageView])
+def get_messages(phone_number: str, db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.phone_number == phone_number).first()
+    if not patient:
+        return []
+    return (
+        db.query(Message)
+        .filter(Message.patient_id == patient.id)
+        .order_by(Message.timestamp.desc())
+        .all()
+    )
+
+@router.post("/messages/{phone_number}", response_model=MessageView)
+def send_doctor_message(phone_number: str, payload: MessageCreate, db: Session = Depends(get_db)):
+    patient = db.query(Patient).filter(Patient.phone_number == phone_number).first()
+    if not patient:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Patient not found")
+    msg = Message(
+        patient_id=patient.id,
+        sender_role="doctor",
+        sender_name=payload.sender_name,
+        subject=payload.subject,
+        body=payload.body,
+        is_read=False,
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return msg

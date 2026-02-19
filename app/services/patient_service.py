@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Patient, TestResult, Appointment, Doctor
+from ..models import Patient, TestResult, Appointment, Doctor, Message
 from ..database import SessionLocal
 from datetime import datetime
 
@@ -138,6 +138,32 @@ class PatientService:
             self.db.commit()
             return True
         return False
+
+    def get_unread_messages(self, patient_id: int):
+        return self.db.query(Message).filter(
+            Message.patient_id == patient_id,
+            Message.sender_role == "doctor",
+            Message.is_read == False
+        ).order_by(Message.timestamp).all()
+
+    def mark_messages_read(self, patient_id: int):
+        self.db.query(Message).filter(
+            Message.patient_id == patient_id,
+            Message.sender_role == "doctor"
+        ).update({"is_read": True})
+        self.db.commit()
+
+    def send_patient_message(self, patient_id: int, sender_name: str, body: str):
+        msg = Message(
+            patient_id=patient_id,
+            sender_role="patient",
+            sender_name=sender_name,
+            body=body,
+            is_read=False
+        )
+        self.db.add(msg)
+        self.db.commit()
+        return msg
 
 def get_patient_service():
     db = SessionLocal()

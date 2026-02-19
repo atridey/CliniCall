@@ -718,6 +718,158 @@
             color: #94a3b8;
             font-size: 0.83rem;
         }
+
+        /* ── Messaging ──────────────────────────────────────────── */
+        .msg-section-header {
+            margin-top: 22px;
+            margin-bottom: 10px;
+            padding: 12px 13px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .msg-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #3b3f99;
+        }
+
+        .msg-section-subtitle {
+            font-size: 0.69rem;
+            color: #94a3b8;
+            margin-left: auto;
+        }
+
+        .msg-thread {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 2px 0 8px;
+            scrollbar-width: thin;
+        }
+
+        .msg-bubble-wrap {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .msg-bubble-wrap.doctor {
+            align-items: flex-end;
+        }
+
+        .msg-bubble-wrap.patient {
+            align-items: flex-start;
+        }
+
+        .msg-bubble {
+            max-width: 82%;
+            padding: 8px 12px;
+            border-radius: 14px;
+            font-size: 0.81rem;
+            line-height: 1.45;
+        }
+
+        .doctor .msg-bubble {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e3a5f;
+            border-bottom-right-radius: 4px;
+        }
+
+        .patient .msg-bubble {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #064e3b;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-meta {
+            font-size: 0.67rem;
+            color: #94a3b8;
+            margin-top: 3px;
+            padding: 0 4px;
+        }
+
+        .msg-subject {
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            opacity: 0.7;
+        }
+
+        .unread-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ef4444;
+            margin-left: 5px;
+            vertical-align: middle;
+            animation: pulse 2s infinite;
+        }
+
+        .msg-compose {
+            margin-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .msg-subject-input,
+        .msg-body-input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            color: #1e293b;
+            background: #f8fafc;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .msg-subject-input:focus,
+        .msg-body-input:focus {
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .msg-send-btn {
+            align-self: flex-end;
+            padding: 7px 16px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .msg-send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .msg-send-btn:active {
+            transform: scale(0.97);
+        }
+
+        .msg-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -965,7 +1117,19 @@
                     <div id="tabMeds" class="tab-pane">${medsHtml}</div>
                     <div id="tabLabs" class="tab-pane">${labsHtml}</div>
                     <div id="tabAppts" class="tab-pane">${apptHtml}</div>
+
+                    <div class="msg-section-header">
+                        <div class="msg-section-title">✉ Messages</div>
+                        <div class="msg-section-subtitle">Doctor-patient secure channel</div>
+                    </div>
+                    <div id="msgThread" class="msg-thread"><div class="empty-state">Loading messages…</div></div>
+                    <div class="msg-compose">
+                        <input id="msgSubject" class="msg-subject-input" placeholder="Subject (optional)">
+                        <textarea id="msgBody" class="msg-body-input" rows="3" placeholder="Write a message to the patient…"></textarea>
+                        <button class="msg-send-btn" id="msgSendBtn" onclick="sendMessage('${p.phone_number}')">Send Message</button>
+                    </div>
                 </div>`;
+            loadMessages(p.phone_number);
         }
 
         function switchPanelTab(btn, tab) {
@@ -974,6 +1138,57 @@
             btn.classList.add('active');
             const map = { problems: 'tabProblems', meds: 'tabMeds', labs: 'tabLabs', appts: 'tabAppts' };
             document.getElementById(map[tab]).classList.add('active');
+        }
+
+        // ── Messaging ───────────────────────────────────────────────────────
+        async function loadMessages(phone) {
+            try {
+                const msgs = await fetch(`/dashboard/messages/${phone}`).then(r => r.json());
+                const thread = document.getElementById('msgThread');
+                if (!thread) return;
+                if (!msgs.length) { thread.innerHTML = '<div class="empty-state">No messages yet. Send the first one below.</div>'; return; }
+                // Sort oldest-first for display
+                const sorted = [...msgs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                const hasUnread = sorted.some(m => m.sender_role === 'patient' && !m.is_read);
+                const msgsTabBtn = document.getElementById('msgsTabBtn');
+                if (msgsTabBtn && hasUnread) {
+                    if (!msgsTabBtn.querySelector('.unread-dot')) {
+                        msgsTabBtn.insertAdjacentHTML('beforeend', '<span class="unread-dot"></span>');
+                    }
+                }
+                thread.innerHTML = sorted.map(m => {
+                    const cls = m.sender_role;
+                    const subj = m.subject ? `<div class="msg-subject">${m.subject}</div>` : '';
+                    const ts = new Date(m.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const unreadBadge = (m.sender_role === 'patient' && !m.is_read) ? ' · <span style="color:#ef4444;font-weight:700">Unread</span>' : '';
+                    return `<div class="msg-bubble-wrap ${cls}">
+                        <div class="msg-bubble">${subj}${m.body}</div>
+                        <div class="msg-meta">${m.sender_name} · ${ts}${unreadBadge}</div>
+                    </div>`;
+                }).join('');
+                thread.scrollTop = thread.scrollHeight;
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendMessage(phone) {
+            const subject = document.getElementById('msgSubject').value.trim();
+            const body = document.getElementById('msgBody').value.trim();
+            if (!body) return;
+            const btn = document.getElementById('msgSendBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+            try {
+                await fetch(`/dashboard/messages/${phone}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_name: 'Dr. Sarah Smith', subject, body })
+                });
+                document.getElementById('msgSubject').value = '';
+                document.getElementById('msgBody').value = '';
+                await loadMessages(phone);
+            } catch (e) { console.error(e); }
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
         }
 
         // ── Init ────────────────────────────────────────────────────────────

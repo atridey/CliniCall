@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Text, Enum as SAEnum
 from sqlalchemy.orm import relationship
 import datetime
 from .database import Base
@@ -40,6 +40,7 @@ class Patient(Base):
     results = relationship("TestResult", back_populates="patient")
     appointments = relationship("Appointment", back_populates="patient")
     logs = relationship("CallLog", back_populates="patient")
+    messages = relationship("Message", back_populates="patient", order_by="Message.timestamp")
 
 class Doctor(Base):
     __tablename__ = "doctors"
@@ -188,3 +189,18 @@ class CallLog(Base):
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
     patient = relationship("Patient", back_populates="logs")
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"))
+    sender_role = Column(String)  # "doctor" or "patient"
+    sender_name = Column(String)  # e.g. "Dr. Sarah Smith" or patient full name
+    subject = Column(String, nullable=True)
+    body = Column(Text)
+    is_read = Column(Boolean, default=False)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
+    patient = relationship("Patient", back_populates="messages")

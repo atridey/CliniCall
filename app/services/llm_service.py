@@ -122,6 +122,8 @@ Age: {2024 - int(patient.dob[:4]) if patient.dob and len(patient.dob) >= 4 else 
 
 [MEDICAL HISTORY SUMMARY]
 {patient.medical_history_summary}
+
+{{unread_messages_block}}
 """
 
         return f"""
@@ -133,11 +135,25 @@ CRITICAL INSTRUCTIONS:
 1. BE EXTREMELY CONCISE. Aim for 1-2 short sentences.
 2. Speak slowly and clearly.
 3. NO emojis, lists, or formatting.
+4. If the patient has UNREAD MESSAGES, mention them naturally at the start of the conversation. Offer to read them and accept a reply.
 
 {verification_context}
 
 {patient_context}
 """
+
+    def _build_system_prompt(self, patient, has_history: bool, unread_messages: list):
+        """Build the system prompt, filling in the unread messages block."""
+        template = self._get_system_prompt(patient, has_history)
+        if unread_messages:
+            msgs_text = "\n".join(
+                f"- From {m.sender_name} ({m.timestamp.strftime('%b %d')}): {m.body}"
+                for m in unread_messages
+            )
+            block = f"[UNREAD DOCTOR MESSAGES]\nYou have {len(unread_messages)} unread message(s) from your care team:\n{msgs_text}"
+        else:
+            block = ""
+        return template.replace("{unread_messages_block}", block)
 
     def process_query(self, patient_phone: str, user_query: str, history: list[dict] = []):
         # 1. Identify Patient
@@ -145,6 +161,11 @@ CRITICAL INSTRUCTIONS:
         if patient_phone != "555-9999":
             patient = self.patient_service.get_patient_by_phone(patient_phone)
         
+        # 1b. Fetch unread messages for known patient
+        unread_messages = []
+        if patient:
+            unread_messages = self.patient_service.get_unread_messages(patient.id)
+
         # 2. Add Context (Results, Appointments) -> Only if patient known
         context_str = ""
         if patient:
@@ -225,6 +246,17 @@ CRITICAL INSTRUCTIONS:
                     },
                     "required": ["pharmacy_name"]
                 }
+            },
+            {
+                "name": "send_message_reply",
+                "description": "Send a message reply from the patient back to their care team. Use this when the patient wants to reply to a doctor message or send a new message.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "body": {"type": "string", "description": "The message body to send from the patient."}
+                    },
+                    "required": ["body"]
+                }
             }
         ]
 
@@ -246,7 +278,7 @@ CRITICAL INSTRUCTIONS:
             # Add current query
             llm_messages.append({"role": "user", "content": f"Context data:\n{context_str}\n\nPatient Query: {user_query}"})
             
-            sys_prompt = self._get_system_prompt(patient, has_history=len(history) > 0)
+            sys_prompt = self._build_system_prompt(patient, has_history=len(history) > 0, unread_messages=unread_messages)
             
             # DEBUG checks
             print("--- DEBUG SYSTEM PROMPT ---")
@@ -318,6 +350,15 @@ CRITICAL INSTRUCTIONS:
                              response_text = f"I have updated your preferred pharmacy to {tool_input['pharmacy_name']}."
                          else:
                              response_text = "I couldn't verified your record to update the pharmacy."
+
+                elif tool_name == "send_message_reply":
+                    if not patient:
+                        response_text = "I need to identify you first before sending a message."
+                    else:
+                        sender_name = f"{patient.first_name} {patient.last_name}"
+                        self.patient_service.send_patient_message(patient.id, sender_name, tool_input['body'])
+                        self.patient_service.mark_messages_read(patient.id)
+                        response_text = "Your message has been sent to your care team."
 
                 else:
                     response_text = "I'm sorry, I don't know how to do that."
