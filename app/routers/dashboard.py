@@ -111,6 +111,7 @@ class PatientView(BaseModel):
     phone_number: str
     address: str | None
     marital_status: str | None
+    preferred_pharmacy: str | None
     emergency_contact_name: str | None
     emergency_contact_relation: str | None
     emergency_contact_phone: str | None
@@ -175,6 +176,7 @@ def get_patient_details(phone_number: str, db: Session = Depends(get_db)):
         phone_number=patient.phone_number,
         address=patient.address,
         marital_status=patient.marital_status,
+        preferred_pharmacy=patient.preferred_pharmacy,
         emergency_contact_name=patient.emergency_contact_name,
         emergency_contact_relation=patient.emergency_contact_relation,
         emergency_contact_phone=patient.emergency_contact_phone,

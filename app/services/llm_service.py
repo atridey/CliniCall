@@ -55,11 +55,73 @@ CONTEXT:
 The conversation is ongoing with {patient.first_name} {patient.last_name}.
 Proceed with their medical request.
 """
+            # Format Full Context
+            
+            # 1. Medications
+            meds_list = []
+            for m in patient.medications:
+                status = f" ({m.status})" if m.status else ""
+                meds_list.append(f"- {m.name} {m.dosage}, {m.frequency} via {m.route}{status}")
+            meds_str = "\n".join(meds_list) if meds_list else "None listed"
+
+            # 2. Allergies
+            allergies_str = patient.allergies_summary or "No known allergies"
+
+            # 3. Insurance
+            ins = patient.insurance
+            insurance_str = f"{ins.provider} ({ins.plan_type}) - Policy: {ins.policy_number}" if ins else "Unknown"
+
+            # 4. Social History
+            soc = patient.social_history
+            social_str = f"Smoking: {soc.smoking_status}, Alcohol: {soc.alcohol_use}, Occupation: {soc.occupation}" if soc else "Not recorded"
+
+            # 5. Vitals (Latest)
+            vitals_list = []
+            # Sort by timestamp desc if possible, or just take last few
+            sorted_vitals = sorted(patient.vitals, key=lambda v: v.timestamp if v.timestamp else datetime.min, reverse=True)[:5]
+            for v in sorted_vitals:
+                vitals_list.append(f"- {v.type}: {v.value} {v.unit} ({v.timestamp.strftime('%Y-%m-%d')})")
+            vitals_str = "\n".join(vitals_list) if vitals_list else "No recent vitals"
+
+            # 6. Problems
+            probs_list = [f"- {p.name} ({p.status})" for p in patient.problems]
+            probs_str = "\n".join(probs_list) if probs_list else "None"
+
+            # 7. Immunizations (Last 5)
+            imm_list = [f"- {i.vaccine_name} ({i.date_administered})" for i in patient.immunizations[:5]]
+            imm_str = "\n".join(imm_list) if imm_list else "None"
+
             patient_context = f"""
-You are speaking with {patient.first_name} {patient.last_name} (Age: {2024 - int(patient.dob[:4]) if patient.dob else '?'}).
-Medical History: {patient.medical_history_summary}
-Medications: {patient.medications}
-number: {patient.phone_number}
+You are speaking with {patient.first_name} {patient.last_name}
+Age: {2024 - int(patient.dob[:4]) if patient.dob and len(patient.dob) >= 4 else '?'} | Gender: {patient.gender} | Phone: {patient.phone_number}
+
+=== CLINICAL PROFILE ===
+[ALLERGIES]
+{allergies_str}
+
+[MEDICATIONS]
+{meds_str}
+
+[ACTIVE PROBLEMS]
+{probs_str}
+
+[INSURANCE]
+{insurance_str}
+
+[PHARMACY]
+{patient.preferred_pharmacy or "Unknown"}
+
+[LATEST VITALS]
+{vitals_str}
+
+[SOCIAL HISTORY]
+{social_str}
+
+[IMMUNIZATIONS]
+{imm_str}
+
+[MEDICAL HISTORY SUMMARY]
+{patient.medical_history_summary}
 """
 
         return f"""
@@ -152,6 +214,17 @@ CRITICAL INSTRUCTIONS:
                     },
                     "required": ["appointment_id", "new_date"]
                 }
+            },
+            {
+                "name": "update_pharmacy",
+                "description": "Update the patient's preferred pharmacy.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "pharmacy_name": {"type": "string", "description": "The new pharmacy name (e.g. 'CVS on Main St')"}
+                    },
+                    "required": ["pharmacy_name"]
+                }
             }
         ]
 
@@ -236,6 +309,16 @@ CRITICAL INSTRUCTIONS:
                      else:
                         response_text = "I couldn't update that appointment. Please check the date or ID."
                 
+                elif tool_name == "update_pharmacy":
+                     if not patient:
+                         response_text = "I need to identify you first."
+                     else:
+                         success = self.patient_service.update_pharmacy(patient.id, tool_input['pharmacy_name'])
+                         if success:
+                             response_text = f"I have updated your preferred pharmacy to {tool_input['pharmacy_name']}."
+                         else:
+                             response_text = "I couldn't verified your record to update the pharmacy."
+
                 else:
                     response_text = "I'm sorry, I don't know how to do that."
             else:

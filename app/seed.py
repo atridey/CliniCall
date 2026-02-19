@@ -53,7 +53,7 @@ patients_seeds = [
         "first_name": "Jane", "last_name": "Roe", "dob": "1950-11-20", "gender": "Female",
         "phone_number": "555-0124", "address": "456 Oak St, Springfield, IL",
         "emergency_contact_name": "Richard Roe", "emergency_contact_phone": "555-0888", "emergency_contact_relation": "Husband",
-        "marital_status": "Married", "preferred_pharmacy": "Walgreens Main St",
+        "marital_status": "Married", "preferred_pharmacy": "Walgreens #108 - Main St",
         "allergies_summary": "Sulfa Drugs",
         "medical_history_summary": "Asthma, Hypothyroidism, Osteoporosis",
         "profile": "respiratory"
@@ -63,7 +63,7 @@ patients_seeds = [
         "first_name": "Robert", "last_name": "Frost", "dob": "1938-03-26", "gender": "Male",
         "phone_number": "555-0130", "address": "88 Winter Ln, Starkville",
         "emergency_contact_name": "Elinor Frost", "emergency_contact_phone": "555-1111", "emergency_contact_relation": "Wife",
-        "marital_status": "Married", "preferred_pharmacy": "Community Care Rx",
+        "marital_status": "Married", "preferred_pharmacy": "Community Care Rx #5",
         "allergies_summary": "Latex",
         "medical_history_summary": "COPD, History of MI (2018)",
         "profile": "cardio_resp"
@@ -72,7 +72,7 @@ patients_seeds = [
         "first_name": "Emily", "last_name": "Dickinson", "dob": "1948-12-10", "gender": "Female",
         "phone_number": "555-0131", "address": "280 Main St, Amherst",
         "emergency_contact_name": "Lavinia Dickinson", "emergency_contact_phone": "555-2222", "emergency_contact_relation": "Sister",
-        "marital_status": "Single", "preferred_pharmacy": "CVS",
+        "marital_status": "Single", "preferred_pharmacy": "CVS Pharmacy #12",
         "allergies_summary": "None",
         "medical_history_summary": "Anxiety, Glaucoma",
         "profile": "geriatric_general"
@@ -81,7 +81,7 @@ patients_seeds = [
         "first_name": "Walt", "last_name": "Whitman", "dob": "1942-05-31", "gender": "Male",
         "phone_number": "555-0132", "address": "15 Leaves Blvd, Camden",
         "emergency_contact_name": "George Whitman", "emergency_contact_phone": "555-3333", "emergency_contact_relation": "Brother",
-        "marital_status": "Widowed", "preferred_pharmacy": "Walgreens",
+        "marital_status": "Widowed", "preferred_pharmacy": "Walgreens #882",
         "allergies_summary": "Seasonal Pollen",
         "medical_history_summary": "Stroke (2020) - Left side weakness",
         "profile": "neuro_rehab"
@@ -90,7 +90,7 @@ patients_seeds = [
         "first_name": "Maya", "last_name": "Angelou", "dob": "1955-04-04", "gender": "Female",
         "phone_number": "555-0133", "address": "7 Caged Bird Way, St. Louis",
         "emergency_contact_name": "Guy Johnson", "emergency_contact_phone": "555-4444", "emergency_contact_relation": "Son",
-        "marital_status": "Divorced", "preferred_pharmacy": "Rite Aid",
+        "marital_status": "Divorced", "preferred_pharmacy": "Rite Aid #441",
         "allergies_summary": "Shellfish",
         "medical_history_summary": "Arthritis, Hypertension",
         "profile": "chronic_mgmt"
@@ -99,7 +99,7 @@ patients_seeds = [
         "first_name": "Langston", "last_name": "Hughes", "dob": "1935-02-01", "gender": "Male",
         "phone_number": "555-0134", "address": "20 Harlem Ave, New York",
         "emergency_contact_name": "Carrie Hughes", "emergency_contact_phone": "555-5555", "emergency_contact_relation": "Daughter",
-        "marital_status": "Widowed", "preferred_pharmacy": "Duane Reade",
+        "marital_status": "Widowed", "preferred_pharmacy": "Duane Reade #77",
         "allergies_summary": "Aspirin",
         "medical_history_summary": "CHF (Congestive Heart Failure), CKD Stage 3",
         "profile": "complex_cardio"
@@ -108,7 +108,7 @@ patients_seeds = [
         "first_name": "Sylvia", "last_name": "Plath", "dob": "1960-10-27", "gender": "Female",
         "phone_number": "555-0135", "address": "5 Bell Jar Ct, London",
         "emergency_contact_name": "Warren Plath", "emergency_contact_phone": "555-6666", "emergency_contact_relation": "Brother",
-        "marital_status": "Married", "preferred_pharmacy": "Boots",
+        "marital_status": "Married", "preferred_pharmacy": "Boots #99 (UK)",
         "allergies_summary": "Bee Stings",
         "medical_history_summary": "Depression, Migraines",
         "profile": "neuro_psych"
@@ -117,7 +117,7 @@ patients_seeds = [
         "first_name": "Oscar", "last_name": "Wilde", "dob": "1958-10-16", "gender": "Male",
         "phone_number": "555-0136", "address": "90 Dorian Gray Ln, Dublin",
         "emergency_contact_name": "Constance Lloyd", "emergency_contact_phone": "555-7777", "emergency_contact_relation": "Wife",
-        "marital_status": "Married", "preferred_pharmacy": "Independent",
+        "marital_status": "Married", "preferred_pharmacy": "Local Care Pharmacy #1",
         "allergies_summary": "None",
         "medical_history_summary": "Gout, Obstructive Sleep Apnea",
         "profile": "metabolic"
@@ -126,7 +126,7 @@ patients_seeds = [
         "first_name": "Virginia", "last_name": "Woolf", "dob": "1949-01-25", "gender": "Female",
         "phone_number": "555-0137", "address": "22 Lighthouse Rd, Sussex",
         "emergency_contact_name": "Leonard Woolf", "emergency_contact_phone": "555-8888", "emergency_contact_relation": "Husband",
-        "marital_status": "Married", "preferred_pharmacy": "CVS",
+        "marital_status": "Married", "preferred_pharmacy": "CVS Pharmacy #22",
         "allergies_summary": "Codeine",
         "medical_history_summary": "Bipolar Disorder, History of Falls",
         "profile": "geriatric_risk"

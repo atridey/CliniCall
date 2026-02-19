@@ -170,8 +170,8 @@
 
         /* ── Phone container ───────────────────────────────── */
         .phone-container {
-            width: 390px;
-            height: 720px;
+            width: 410px;
+            height: 760px;
             border-radius: 44px;
             box-shadow:
                 0 0 0 1px rgba(255, 255, 255, 0.15),
@@ -578,11 +578,34 @@
             chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
         }
 
+        let voices = [];
+        window.speechSynthesis.onvoiceschanged = () => {
+            voices = window.speechSynthesis.getVoices();
+        };
+
         function speak(text) {
             window.speechSynthesis.cancel();
             const clean = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
             const utt = new SpeechSynthesisUtterance(clean);
-            utt.rate = 1.6;
+
+            // Try to find a high-quality voice
+            if (voices.length === 0) voices = window.speechSynthesis.getVoices();
+
+            // Priority: Google US English > Microsoft Aria > Any US English Female-sounding > Any US English
+            const preferred = voices.find(v => v.name === "Google US English") ||
+                voices.find(v => v.name.includes("Microsoft Aria")) ||
+                voices.find(v => v.lang === "en-US" && v.name.includes("Female")) ||
+                voices.find(v => v.lang === "en-US");
+
+            if (preferred) {
+                utt.voice = preferred;
+                // console.log("Using voice:", preferred.name);
+            }
+
+            // Slightly humanize the delivery
+            utt.rate = 1.05 + (Math.random() * 0.1 - 0.05); // 1.0 - 1.1
+            utt.pitch = 1.0 + (Math.random() * 0.05 - 0.025); // 0.975 - 1.025
+
             window.speechSynthesis.speak(utt);
         }
     </script>
