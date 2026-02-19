@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+python-dotenv
+openai
+jinja2
+python-multipart
+requests
+anthropic

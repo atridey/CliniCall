@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CliniCall</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            flex-direction: column;
+            /* Allow switcher above phone */
+            gap: 20px;
+        }
+
+        .phone-container {
+            width: 390px;
+            height: 780px;
+            /* Taller but fitting */
+            background-color: #fff;
+            border-radius: 40px;
+            box-shadow:
+                0 0 0 12px #202020,
+                0 0 0 14px #444,
+                0 30px 60px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Dynamic Island / Notch Mockup */
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background: #202020;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 100;
+        }
+
+        .screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            padding: 50px 20px 20px 20px;
+            /* Top padding for notch */
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 20px;
+            scrollbar-width: none;
+            /* Hide scrollbar */
+            min-height: 0;
+            /* Important for flex scrolling */
+        }
+
+        .chat-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: messagePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            flex-shrink: 0;
+            /* Prevent squishing */
+        }
+
+        @keyframes messagePop {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .agent-msg {
+            align-self: flex-start;
+            background-color: #f1f5f9;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: auto;
+            position: relative;
+            padding-top: 20px;
+            background: white;
+            /* Cover content behind */
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .status {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            height: 1.5em;
+            font-weight: 500;
+        }
+
+        .ptt-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Pulse Rings */
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid #3b82f6;
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        .active .ring {
+            animation: ripple 1.5s infinite;
+        }
+
+        .active .ring:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .active .ring:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .ptt-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+            z-index: 10;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ptt-btn:active,
+        .ptt-btn.active {
+            transform: scale(0.9);
+            background: #1d4ed8;
+        }
+
+        .ptt-btn.disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Sim Switcher */
+        .sim-switcher {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        select {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-family: inherit;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sim-switcher">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Caller Identity Status</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="matchParams"
+                    style="padding: 8px 12px; background: #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-weight: 500; color: #475569; width: 100%; text-align: center;">
+                    Unknown Caller
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="phone-container">
+        <div class="notch"></div>
+        <div class="screen">
+            <div class="header">
+                <div class="logo">CliniCall</div>
+            </div>
+
+            <div class="chat-area" id="chatArea">
+                <!-- Messages -->
+            </div>
+
+            <div class="controls">
+                <div id="status" class="status">Hold button to speak</div>
+                <div class="ptt-wrapper" id="pttWrapper">
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <button id="pttBtn" class="ptt-btn">🎙️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pttBtn = document.getElementById('pttBtn');
+        const pttWrapper = document.getElementById('pttWrapper');
+        const statusDiv = document.getElementById('status');
+        const chatArea = document.getElementById('chatArea');
+
+        // Smart Matching Logic
+        let allPatients = [];
+        let matchedPatient = null;
+
+        async function loadPatients() {
+            try {
+                const res = await fetch('/dashboard/patients');
+                allPatients = await res.json();
+                // identifyCaller(); // Run once - no longer needed as there are no inputs
+            } catch (e) { console.error("Failed to load patients", e); }
+        }
+
+        function identifyCaller() {
+            // No manual inputs anymore.
+            // This function is now mainly for resetting state or debug.
+        }
+
+        let conversationHistory = [];
+
+        function resetChat(skipGreeting = false) {
+            chatArea.innerHTML = '';
+            conversationHistory = [];
+            matchedPatient = null;
+
+            const statusBadge = document.getElementById('matchParams');
+            statusBadge.innerHTML = 'Unknown Caller';
+            statusBadge.style.background = '#e2e8f0';
+            statusBadge.style.color = '#475569';
+
+            if (skipGreeting) return;
+
+            // Security greeting - strictly ask for ID
+            const greeting = "Hello, this is CliniCall. For security, please state your full name and date of birth.";
+
+            addMessage("agent", greeting);
+            if ('speechSynthesis' in window) {
+                setTimeout(() => { try { speak(greeting); } catch (e) { } }, 500);
+            }
+        }
+
+        // Initial Load
+        window.addEventListener('load', () => {
+            loadPatients();
+            resetChat();
+        });
+        if ('speechSynthesis' in window) {
+            setTimeout(() => {
+                try { speak(INITIAL_MSG); } catch (e) { }
+            }, 800);
+        }
+
+        let recognition;
+        let isListening = false;
+        let isProcessing = false;
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            let finalTranscript = '';
+
+            recognition.onstart = function () {
+                statusDiv.textContent = "Listening...";
+                isListening = true;
+                pttBtn.classList.add('active');
+                pttWrapper.classList.add('active');
+                finalTranscript = '';
+            };
+
+            recognition.onresult = function (event) {
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                    else interimTranscript += event.results[i][0].transcript;
+                }
+                statusDiv.textContent = interimTranscript || "Listening...";
+            };
+
+            recognition.onerror = (event) => { if (event.error !== 'no-speech') statusDiv.textContent = "Error"; };
+
+            recognition.onend = function () {
+                isListening = false;
+                pttBtn.classList.remove('active');
+                pttWrapper.classList.remove('active');
+                if (!isProcessing) statusDiv.textContent = "Hold button to speak";
+            };
+
+            const start = () => {
+                if (!isProcessing && !isListening) try {
+                    window.speechSynthesis.cancel();
+                    recognition.start();
+                } catch (e) { }
+            };
+            const stop = () => {
+                if (isListening) {
+                    recognition.stop();
+                    setTimeout(async () => {
+                        const text = finalTranscript.trim();
+                        if (text) await processQuery(text);
+                        else statusDiv.textContent = "Hold button to speak";
+                    }, 300);
+                }
+            };
+
+            pttBtn.addEventListener('mousedown', start);
+            pttBtn.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
+            pttBtn.addEventListener('mouseup', stop);
+            pttBtn.addEventListener('touchend', (e) => { e.preventDefault(); stop(); });
+            pttBtn.addEventListener('mouseleave', () => { if (isListening) stop(); });
+
+        } else {
+            statusDiv.textContent = "Browser not supported";
+        }
+
+        async function processQuery(text) {
+            isProcessing = true;
+            pttBtn.classList.add('disabled');
+            statusDiv.textContent = "Thinking...";
+            addMessage("user", text);
+
+            // Use matched patient phone or unknown
+            const currentPhone = matchedPatient ? matchedPatient.phone_number : "555-9999";
+
+            try {
+                const response = await fetch('/agent/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone_number: currentPhone,
+                        query: text,
+                        history: conversationHistory
+                    })
+                });
+                const data = await response.json();
+
+                // Handle identity switch
+                if (data.identified_patient) {
+                    const p = data.identified_patient;
+
+                    // Trigger match logic visually
+                    matchedPatient = p;
+                    const statusBadge = document.getElementById('matchParams');
+                    statusBadge.innerHTML = `✅ ${p.first_name} ${p.last_name}`;
+                    statusBadge.style.background = '#dcfce7';
+                    statusBadge.style.color = '#166534';
+                }
+
+                addMessage("agent", data.response_text);
+                speak(data.response_text);
+            } catch (e) {
+                addMessage("agent", "Connection error.");
+            } finally {
+                isProcessing = false;
+                pttBtn.classList.remove('disabled');
+                statusDiv.textContent = "Hold button to speak";
+            }
+        }
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.classList.add('message', role === 'user' ? 'user-msg' : 'agent-msg');
+            div.textContent = text;
+            chatArea.appendChild(div);
+
+            // Add to history
+            conversationHistory.push({ role: role, content: text });
+
+            // Smooth scroll
+            chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            // Strip emojis to prevent reading them out
+            const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.6;
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+
+</html>
