@@ -4,406 +4,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CliniCall</title>
+    <title>CliniCall Phone</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
-        html {
-            zoom: 0.85;
-        }
-
         * {
             box-sizing: border-box;
+            user-select: none;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
             margin: 0;
             min-height: 100vh;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            gap: 20px;
+            background: #f0f2f5;
+            color: #1c1c1e;
+        }
+
+        /* Phone Frame (S24 Style) */
+        .phone {
+            width: 360px;
+            height: 780px;
+            background: white;
+            border-radius: 24px;
             position: relative;
-
-            /* Vivid aurora gradient bg */
-            background: linear-gradient(135deg,
-                    #1e0533 0%,
-                    #3b1fa8 25%,
-                    #2563eb 50%,
-                    #0891b2 75%,
-                    #065f46 100%);
-            background-size: 400% 400%;
-            animation: auroraShift 16s ease infinite;
-        }
-
-        @keyframes auroraShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Soft light orbs layered on top */
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        body::before {
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 70%);
-            top: -200px;
-            left: -200px;
-            animation: orbDrift 18s ease-in-out infinite alternate;
-        }
-
-        body::after {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.3) 0%, transparent 70%);
-            bottom: -150px;
-            right: -150px;
-            animation: orbDrift 14s ease-in-out infinite alternate-reverse;
-        }
-
-        @keyframes orbDrift {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            100% {
-                transform: translate(40px, 30px);
-            }
-        }
-
-        /* ── Identity badge ────────────────────────────────── */
-        .identity-badge {
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 11px 20px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 10;
-            min-width: 270px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        .badge-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #fbbf24;
-            flex-shrink: 0;
-            animation: pulseAmber 2s ease-in-out infinite;
-        }
-
-        .badge-dot.identified {
-            background: #34d399;
-            animation: pulseGreen 2s ease-in-out infinite;
-        }
-
-        @keyframes pulseAmber {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
-            }
-        }
-
-        @keyframes pulseGreen {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
-            }
-        }
-
-        .badge-label {
-            font-size: 0.68rem;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-family: 'Outfit', sans-serif;
-            margin-bottom: 2px;
-        }
-
-        #matchParams {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            font-family: 'Outfit', sans-serif;
-            transition: color 0.4s;
-        }
-
-        #matchParams.identified {
-            color: #6ee7b7;
-        }
-
-        /* ── Phone container ───────────────────────────────── */
-        .phone-container {
-            width: 410px;
-            height: 760px;
-            border-radius: 44px;
-            box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.15),
-                0 0 0 11px #1a1a2e,
-                0 0 0 13px rgba(255, 255, 255, 0.08),
-                0 40px 80px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
-            position: relative;
-            z-index: 10;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border: 8px solid #1c1c1e;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Dynamic Island */
         .notch {
             position: absolute;
-            top: 10px;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 110px;
-            height: 28px;
-            background: #1a1a2e;
-            border-radius: 20px;
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            /* Hole punch */
             z-index: 100;
-            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
         }
 
-        /* ── Light-mode phone screen ───────────────────────── */
-        .screen {
-            flex: 1;
+        .status-bar {
+            height: 44px;
             display: flex;
-            flex-direction: column;
-            /* Crisp white-to-light-blue interior — high contrast */
-            background: linear-gradient(175deg, #f8faff 0%, #eef2ff 100%);
-            padding: 55px 20px 20px 20px;
-            height: 100%;
-            box-sizing: border-box;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin-top: 0;
+            opacity: 0.9;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 14px;
-            flex-shrink: 0;
-        }
-
-        .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #2563eb, #7c3aed);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.01em;
-        }
-
-        /* ── Chat area ─────────────────────────────────────── */
-        .chat-area {
+        /* Adjust main view padding to account for status bar overlay */
+        .view {
             flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding-bottom: 16px;
-            scrollbar-width: none;
-            min-height: 0;
-        }
-
-        .chat-area::-webkit-scrollbar {
             display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+            padding-top: 44px;
+            /* Space for status bar */
         }
 
-        .message {
-            max-width: 82%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 0.9rem;
-            line-height: 1.55;
-            flex-shrink: 0;
-            animation: msgIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        .view.active {
+            display: flex;
         }
 
-        @keyframes msgIn {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: scale(0.85) translateY(8px);
+                transform: scale(0.98);
             }
 
             to {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: scale(1);
             }
         }
 
-        /* Agent: soft card on light bg */
-        .agent-msg {
-            align-self: flex-start;
-            background: #ffffff;
-            color: #1e293b;
-            border: 1px solid #e2e8f0;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        /* -- Contact View (Detail) -- */
+        .contact-view {
+            background: #f2f2f7;
+            padding-top: 60px;
+            align-items: center;
         }
 
-        /* User: vivid gradient */
-        .user-msg {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+        .c-detail-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34c759, #30b0c7);
             color: white;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(52, 199, 89, 0.3);
         }
 
-        /* ── Controls ──────────────────────────────────────── */
-        .controls {
+        .c-detail-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .c-detail-role {
+            font-size: 16px;
+            color: #8e8e93;
+            margin-bottom: 32px;
+        }
+
+        .c-actions {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .c-action-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 16px;
-            /* Subtle separator to float above chat */
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
-            background: rgba(248, 250, 255, 0.95);
-            backdrop-filter: blur(8px);
-            flex-shrink: 0;
+            gap: 8px;
+            color: #007aff;
+            cursor: pointer;
+            transition: transform 0.1s;
         }
 
-        .status {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-bottom: 18px;
-            height: 1.4em;
-            font-weight: 500;
-            letter-spacing: 0.02em;
-            transition: color 0.3s;
+        .c-action-btn:active {
+            transform: scale(0.95);
         }
 
-        .status.listening {
-            color: #3b82f6;
-        }
-
-        .status.processing {
-            color: #7c3aed;
-        }
-
-        /* ── PTT ───────────────────────────────────────────── */
-        .ptt-wrapper {
-            position: relative;
+        .c-icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #e5e5ea;
+            color: #007aff;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 24px;
         }
 
-        .ring {
-            position: absolute;
+        .c-action-btn.primary .c-icon-circle {
+            background: #34c759;
+            color: white;
+            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.4);
+        }
+
+        .c-action-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #007aff;
+        }
+
+        /* -- Call View -- */
+        .call-view {
+            background: linear-gradient(180deg, #2c3e50 0%, #000000 100%);
+            color: white;
+            justify-content: space-between;
+            padding-bottom: 40px;
+        }
+
+        .call-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 60px;
+        }
+
+        .call-avatar {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            border: 2px solid #3b82f6;
-            width: 96px;
-            height: 96px;
+            background: #e5e5ea;
+            color: #8e8e93;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .call-name {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .call-status {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 400;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 0 30px;
+            margin-bottom: 40px;
+        }
+
+        .ctrl-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .ctrl-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:active .ctrl-icon {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .ctrl-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .ctrl-btn.active .ctrl-icon {
+            background: #fff;
+            color: #1c1c1e;
+        }
+
+        .ctrl-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hangup-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #eb4d3d;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(235, 77, 61, 0.4);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .hangup-btn:active {
+            transform: scale(0.95);
+            background: #d63a2b;
+        }
+
+        /* Pulse for speaking */
+        .speaking-ring {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid rgba(52, 199, 89, 0.5);
+            animation: pulseRing 1.5s infinite;
             opacity: 0;
-            z-index: 0;
+            pointer-events: none;
         }
 
-        .active .ring {
-            animation: ripple 1.6s ease-out infinite;
-        }
-
-        .active .ring:nth-child(2) {
-            animation-delay: 0.4s;
-            border-color: #7c3aed;
-        }
-
-        .active .ring:nth-child(3) {
-            animation-delay: 0.8s;
-        }
-
-        @keyframes ripple {
+        @keyframes pulseRing {
             0% {
                 transform: scale(1);
-                opacity: 0.5;
+                opacity: 0.6;
             }
 
             100% {
-                transform: scale(2.2);
+                transform: scale(1.6);
                 opacity: 0;
-            }
-        }
-
-        .ptt-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #7c3aed);
-            border: none;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow:
-                0 0 0 4px rgba(59, 130, 246, 0.12),
-                0 8px 24px rgba(59, 130, 246, 0.4);
-            z-index: 10;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .ptt-btn:active,
-        .ptt-btn.active {
-            transform: scale(0.92);
-            box-shadow:
-                0 0 0 4px rgba(124, 58, 237, 0.2),
-                0 10px 30px rgba(124, 58, 237, 0.5);
-        }
-
-        .ptt-btn.disabled {
-            background: #e2e8f0;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .ptt-btn.processing {
-            animation: processingPulse 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes processingPulse {
-            from {
-                box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15), 0 8px 24px rgba(124, 58, 237, 0.3);
-            }
-
-            to {
-                box-shadow: 0 0 0 8px rgba(124, 58, 237, 0.05), 0 12px 32px rgba(124, 58, 237, 0.6);
             }
         }
     </style>
@@ -411,173 +319,315 @@
 
 <body>
 
-    <div class="identity-badge" id="identityBadge">
-        <div class="badge-dot" id="badgeDot"></div>
-        <div>
-            <div class="badge-label">Caller Identity</div>
-            <div id="matchParams">Unknown Caller</div>
-        </div>
-    </div>
-
-    <div class="phone-container">
+    <div class="phone">
         <div class="notch"></div>
-        <div class="screen">
-            <div class="header">
-                <div class="logo">CliniCall</div>
+        <div class="status-bar">
+            <!-- Clock removed -->
+        </div>
+
+        <!-- Contact View (Detail) -->
+        <div class="view contact-view active" id="viewContact">
+            <div class="c-detail-avatar">AI</div>
+            <div class="c-detail-name">CliniCall AI</div>
+            <div class="c-detail-role">Medical Assistant</div>
+
+            <div class="c-actions">
+                <div class="c-action-btn disabled" style="opacity: 0.5;">
+                    <div class="c-icon-circle" style="background: #e5e5ea; color: #b0b0b5;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+                        </svg>
+                    </div>
+                    <span class="c-action-label">message</span>
+                </div>
+
+                <div class="c-action-btn primary" onclick="startCall()">
+                    <div class="c-icon-circle">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-2.2 2.2c-3.23-1.61-5.81-4.19-7.43-7.43l2.2-2.21c.27-.26.35-.65.24-1.00-.36-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 2 3 2.24 3 2.99 3 13.28 11.35 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                        </svg>
+                    </div>
+                    <span class="c-action-label">call</span>
+                </div>
+
+                <div class="c-action-btn disabled" style="opacity: 0.5;">
+                    <div class="c-icon-circle" style="background: #e5e5ea; color: #b0b0b5;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                        </svg>
+                    </div>
+                    <span class="c-action-label">video</span>
+                </div>
+
+                <div class="c-action-btn disabled" style="opacity: 0.5;">
+                    <div class="c-icon-circle" style="background: #e5e5ea; color: #b0b0b5;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                        </svg>
+                    </div>
+                    <span class="c-action-label">mail</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call View (Active Call) -->
+        <div class="view call-view" id="viewCall">
+            <div class="call-info">
+                <div style="position:relative">
+                    <div class="call-avatar">AI</div>
+                    <div class="speaking-ring" id="activityRing"></div>
+                </div>
+                <div class="call-name">CliniCall AI</div>
+                <div class="call-status" id="callTimer">00:00</div>
+                <div class="call-status" id="verifyStatus"
+                    style="font-size:14px; margin-top:8px; display:none; color:#34c759">✓ Identity Verified</div>
             </div>
 
-            <div class="chat-area" id="chatArea"></div>
-
-            <div class="controls">
-                <div id="status" class="status">Hold button to speak</div>
-                <div class="ptt-wrapper" id="pttWrapper">
-                    <div class="ring"></div>
-                    <div class="ring"></div>
-                    <div class="ring"></div>
-                    <button id="pttBtn" class="ptt-btn">🎙️</button>
+            <div class="controls-grid">
+                <div class="ctrl-btn" id="btnMute" onclick="toggleMute()">
+                    <div class="ctrl-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                            <path
+                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                    </div>
+                    <div class="ctrl-label">Mute</div>
                 </div>
+                <div class="ctrl-btn disabled">
+                    <div class="ctrl-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20 1H4C2.34 1 1 2.34 1 4v16c0 1.66 1.34 3 3 3h16c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm-9 16h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                        </svg>
+                    </div>
+                    <div class="ctrl-label">Keypad</div>
+                </div>
+                <div class="ctrl-btn disabled">
+                    <div class="ctrl-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 9v6h4l5 5V4l-5 5H7z" />
+                        </svg>
+                    </div>
+                    <div class="ctrl-label">Speaker</div>
+                </div>
+                <div class="ctrl-btn disabled">
+                    <div class="ctrl-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg></div>
+                    <div class="ctrl-label">Add Call</div>
+                </div>
+                <div class="ctrl-btn disabled">
+                    <div class="ctrl-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                        </svg></div>
+                    <div class="ctrl-label">Video</div>
+                </div>
+                <div class="ctrl-btn disabled">
+                    <div class="ctrl-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                        </svg></div>
+                    <div class="ctrl-label">Contacts</div>
+                </div>
+            </div>
+
+            <div class="hangup-btn" onclick="endCall()">
+                <!-- Using SVG for better end-call icon -->
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path
+                        d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" />
+                </svg>
             </div>
         </div>
     </div>
 
     <script>
-        const pttBtn = document.getElementById('pttBtn');
-        const pttWrapper = document.getElementById('pttWrapper');
-        const statusDiv = document.getElementById('status');
-        const chatArea = document.getElementById('chatArea');
-        const matchParams = document.getElementById('matchParams');
-        const badgeDot = document.getElementById('badgeDot');
-
-        let allPatients = [];
-        let matchedPatient = null;
-
-        async function loadPatients() {
-            try {
-                const res = await fetch('/dashboard/patients');
-                allPatients = await res.json();
-            } catch (e) { console.error("Failed to load patients", e); }
-        }
-
+        // -- State --
+        let isCallActive = false;
+        let isMuted = false;
+        let callDuration = 0;
+        let timerInt = null;
         let conversationHistory = [];
+        let recognition = null;
+        let isListening = false;
+        let isSpeaking = false;
+        let matchedPatient = null; // Restore matchedPatient state
 
-        function resetChat(skipGreeting = false) {
-            chatArea.innerHTML = '';
-            conversationHistory = [];
-            matchedPatient = null;
-            matchParams.textContent = 'Unknown Caller';
-            matchParams.classList.remove('identified');
-            badgeDot.classList.remove('identified');
-            if (skipGreeting) return;
-            const greeting = "Hello, this is CliniCall. For security, please state your full name and date of birth.";
-            addMessage("agent", greeting);
-            if ('speechSynthesis' in window) {
-                setTimeout(() => { try { speak(greeting); } catch (e) { } }, 500);
-            }
-        }
+        // -- Elements --
+        const viewContact = document.getElementById('viewContact');
+        const viewCall = document.getElementById('viewCall');
+        const callTimer = document.getElementById('callTimer');
+        const btnMute = document.getElementById('btnMute');
+        const activityRing = document.getElementById('activityRing');
+        const verifyStatus = document.getElementById('verifyStatus');
 
-        window.addEventListener('load', () => { loadPatients(); resetChat(); });
+        // These IDs were in original, mapping them to new UI elements where possible or dummies
+        const matchParams = { textContent: '', classList: { add: () => { }, remove: () => { } } };
+        const badgeDot = { classList: { add: () => { }, remove: () => { } } };
 
-        let recognition, isListening = false, isProcessing = false;
+        // -- Audio & STT --
+        let shouldListen = false; // Control flag for half-duplex flow
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = 'en-US';
-            let finalTranscript = '';
 
-            recognition.onstart = () => {
-                statusDiv.textContent = "Listening...";
-                statusDiv.className = 'status listening';
-                isListening = true;
-                pttBtn.classList.add('active');
-                pttWrapper.classList.add('active');
-                finalTranscript = '';
-            };
-            recognition.onresult = (event) => {
-                let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-                    else interim += event.results[i][0].transcript;
-                }
-                statusDiv.textContent = interim || "Listening...";
-            };
-            recognition.onerror = (e) => {
-                if (e.error !== 'no-speech') { statusDiv.textContent = "Error"; statusDiv.className = 'status'; }
-            };
+            recognition.onstart = () => { isListening = true; };
             recognition.onend = () => {
                 isListening = false;
-                pttBtn.classList.remove('active');
-                pttWrapper.classList.remove('active');
-                if (!isProcessing) { statusDiv.textContent = "Hold button to speak"; statusDiv.className = 'status'; }
-            };
-
-            const start = () => {
-                if (!isProcessing && !isListening) try { window.speechSynthesis.cancel(); recognition.start(); } catch (e) { }
-            };
-            const stop = () => {
-                if (isListening) {
-                    recognition.stop();
-                    setTimeout(async () => {
-                        const text = finalTranscript.trim();
-                        if (text) await processQuery(text);
-                        else { statusDiv.textContent = "Hold button to speak"; statusDiv.className = 'status'; }
-                    }, 300);
+                // Only restart if we WANT to be listening (and call is active/unmuted)
+                if (isCallActive && !isMuted && shouldListen) {
+                    try { recognition.start(); } catch (e) { }
                 }
             };
-
-            pttBtn.addEventListener('mousedown', start);
-            pttBtn.addEventListener('touchstart', (e) => { e.preventDefault(); start(); });
-            pttBtn.addEventListener('mouseup', stop);
-            pttBtn.addEventListener('touchend', (e) => { e.preventDefault(); stop(); });
-            pttBtn.addEventListener('mouseleave', () => { if (isListening) stop(); });
+            recognition.onresult = handleSpeechResult;
         } else {
-            statusDiv.textContent = "Browser not supported";
+            alert('Browser does not support Speech Recognition (Chrome/Safari required).');
         }
 
-        async function processQuery(text) {
-            isProcessing = true;
-            pttBtn.classList.add('disabled', 'processing');
-            statusDiv.textContent = "Thinking...";
-            statusDiv.className = 'status processing';
-            addMessage("user", text);
+        // -- Application Logic --
 
-            const currentPhone = matchedPatient ? matchedPatient.phone_number : "555-9999";
-            try {
-                const response = await fetch('/agent/query', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone_number: currentPhone, query: text, history: conversationHistory })
-                });
-                const data = await response.json();
-                if (data.identified_patient) {
-                    const p = data.identified_patient;
-                    matchedPatient = p;
-                    matchParams.textContent = `${p.first_name} ${p.last_name}`;
-                    matchParams.classList.add('identified');
-                    badgeDot.classList.add('identified');
+        function startCall() {
+            isCallActive = true;
+            viewContact.classList.remove('active');
+            viewCall.classList.add('active');
+
+            // Reset state
+            callDuration = 0;
+            callTimer.textContent = "00:00";
+            verifyStatus.style.display = 'none';
+            btnMute.classList.remove('active');
+            isMuted = false;
+            matchedPatient = null;
+            conversationHistory = [];
+
+            // Start Timer
+            timerInt = setInterval(() => {
+                callDuration++;
+                const m = Math.floor(callDuration / 60).toString().padStart(2, '0');
+                const s = (callDuration % 60).toString().padStart(2, '0');
+                callTimer.textContent = `${m}:${s}`;
+            }, 1000);
+
+            // Initial Greeting (AI goes first)
+            shouldListen = false; // Don't listen yet
+            setTimeout(() => {
+                const greeting = "Hello, this is CliniCall. For security, please state your full name and date of birth.";
+                conversationHistory.push({ role: 'agent', content: greeting });
+                speak(greeting);
+            }, 800);
+        }
+
+        function endCall() {
+            isCallActive = false;
+            shouldListen = false;
+            clearInterval(timerInt);
+            window.speechSynthesis.cancel();
+            if (isListening) recognition.stop();
+
+            viewCall.classList.remove('active');
+            viewContact.classList.add('active');
+            conversationHistory = [];
+            matchedPatient = null;
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            if (isMuted) {
+                btnMute.classList.add('active'); // White bg = Muted
+                shouldListen = false;
+                recognition.stop();
+            } else {
+                btnMute.classList.remove('active');
+                if (!isSpeaking) {
+                    shouldListen = true;
+                    try { recognition.start(); } catch (e) { }
                 }
-                addMessage("agent", data.response_text);
-                speak(data.response_text);
-            } catch (e) {
-                addMessage("agent", "Connection error.");
-            } finally {
-                isProcessing = false;
-                pttBtn.classList.remove('disabled', 'processing');
-                statusDiv.textContent = "Hold button to speak";
-                statusDiv.className = 'status';
             }
         }
 
-        function addMessage(role, text) {
-            const div = document.createElement('div');
-            div.classList.add('message', role === 'user' ? 'user-msg' : 'agent-msg');
-            div.textContent = text;
-            chatArea.appendChild(div);
-            conversationHistory.push({ role, content: text });
-            chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
+        // -- Speech Handling --
+        let silenceTimer = null;
+        let pendingText = "";
+
+        function handleSpeechResult(event) {
+            clearTimeout(silenceTimer); // Clear timer on ANY input (interim or final)
+
+            let interim = '';
+            let newFinal = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) newFinal += event.results[i][0].transcript;
+                else interim += event.results[i][0].transcript;
+            }
+
+            if (newFinal) {
+                pendingText += " " + newFinal;
+            }
+
+            // If we have pending text (and no active interim), wait for silence then send
+            if (pendingText.trim()) {
+                silenceTimer = setTimeout(() => {
+                    // Only process if no interim is currently active? 
+                    // Actually, if timer fired, it means silence for 800ms.
+                    // So interim must have died or become final.
+
+                    const textToSend = pendingText.trim();
+                    pendingText = ""; // Clear buffer
+
+                    shouldListen = false; // Stop listening
+                    recognition.stop();
+                    processQuery(textToSend);
+                }, 800);
+            }
         }
 
+        async function processQuery(text) {
+            if (!text.trim()) return;
+            conversationHistory.push({ role: 'user', content: text });
+
+            // Visual indicator
+            activityRing.style.opacity = '1';
+            setTimeout(() => activityRing.style.opacity = '0', 500);
+
+            // CORRECTED LOGIC: Use matchedPatient or 555-9999 (Start State)
+            const currentPhone = matchedPatient ? matchedPatient.phone_number : "555-9999";
+
+            try {
+                const res = await fetch('/agent/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone_number: currentPhone,
+                        query: text,
+                        history: conversationHistory
+                    })
+                });
+                const data = await res.json();
+
+                if (data.identified_patient) {
+                    matchedPatient = data.identified_patient;
+                    verifyStatus.style.display = 'block';
+                    // We could update UI name here if desired
+                }
+
+                conversationHistory.push({ role: 'agent', content: data.response_text });
+                speak(data.response_text);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // -- ORIGINAL TTS LOGIC (Restored) --
         let voices = [];
         window.speechSynthesis.onvoiceschanged = () => {
             voices = window.speechSynthesis.getVoices();
@@ -588,10 +638,9 @@
             const clean = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
             const utt = new SpeechSynthesisUtterance(clean);
 
-            // Try to find a high-quality voice
+            // Try to find a high-quality voice (Exact original priority list)
             if (voices.length === 0) voices = window.speechSynthesis.getVoices();
 
-            // Priority: Google US English > Microsoft Aria > Any US English Female-sounding > Any US English
             const preferred = voices.find(v => v.name === "Google US English") ||
                 voices.find(v => v.name.includes("Microsoft Aria")) ||
                 voices.find(v => v.lang === "en-US" && v.name.includes("Female")) ||
@@ -599,12 +648,29 @@
 
             if (preferred) {
                 utt.voice = preferred;
-                // console.log("Using voice:", preferred.name);
             }
 
-            // Slightly humanize the delivery
+            // Slightly humanize the delivery (Original randomization)
             utt.rate = 1.05 + (Math.random() * 0.1 - 0.05); // 1.0 - 1.1
             utt.pitch = 1.0 + (Math.random() * 0.05 - 0.025); // 0.975 - 1.025
+
+            // Visual hooks for the phone UI & Turn-Taking release
+            utt.onstart = () => {
+                isSpeaking = true;
+                activityRing.style.animation = 'pulseRing 1s infinite';
+                activityRing.style.opacity = 1;
+            };
+            utt.onend = () => {
+                isSpeaking = false;
+                activityRing.style.animation = 'none';
+                activityRing.style.opacity = 0;
+
+                // Turn over: User can speak now
+                if (isCallActive && !isMuted) {
+                    shouldListen = true;
+                    try { recognition.start(); } catch (e) { }
+                }
+            };
 
             window.speechSynthesis.speak(utt);
         }
@@ -612,3 +678,4 @@
 </body>
 
 </html>
+```
