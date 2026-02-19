@@ -5,88 +5,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CliniCall</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
+        html {
+            zoom: 0.85;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
             flex-direction: column;
-            /* Allow switcher above phone */
             gap: 20px;
+            position: relative;
+
+            /* Vivid aurora gradient bg */
+            background: linear-gradient(135deg,
+                    #1e0533 0%,
+                    #3b1fa8 25%,
+                    #2563eb 50%,
+                    #0891b2 75%,
+                    #065f46 100%);
+            background-size: 400% 400%;
+            animation: auroraShift 16s ease infinite;
         }
 
+        @keyframes auroraShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Soft light orbs layered on top */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        body::before {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 70%);
+            top: -200px;
+            left: -200px;
+            animation: orbDrift 18s ease-in-out infinite alternate;
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.3) 0%, transparent 70%);
+            bottom: -150px;
+            right: -150px;
+            animation: orbDrift 14s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes orbDrift {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(40px, 30px);
+            }
+        }
+
+        /* ── Identity badge ────────────────────────────────── */
+        .identity-badge {
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 11px 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+            min-width: 270px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fbbf24;
+            flex-shrink: 0;
+            animation: pulseAmber 2s ease-in-out infinite;
+        }
+
+        .badge-dot.identified {
+            background: #34d399;
+            animation: pulseGreen 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseAmber {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
+            }
+        }
+
+        @keyframes pulseGreen {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+            }
+        }
+
+        .badge-label {
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 2px;
+        }
+
+        #matchParams {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Outfit', sans-serif;
+            transition: color 0.4s;
+        }
+
+        #matchParams.identified {
+            color: #6ee7b7;
+        }
+
+        /* ── Phone container ───────────────────────────────── */
         .phone-container {
             width: 390px;
-            height: 780px;
-            /* Taller but fitting */
-            background-color: #fff;
-            border-radius: 40px;
+            height: 720px;
+            border-radius: 44px;
             box-shadow:
-                0 0 0 12px #202020,
-                0 0 0 14px #444,
-                0 30px 60px rgba(0, 0, 0, 0.4);
+                0 0 0 1px rgba(255, 255, 255, 0.15),
+                0 0 0 11px #1a1a2e,
+                0 0 0 13px rgba(255, 255, 255, 0.08),
+                0 40px 80px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            z-index: 10;
         }
 
-        /* Dynamic Island / Notch Mockup */
+        /* Dynamic Island */
         .notch {
             position: absolute;
-            top: 0;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 30px;
-            background: #202020;
-            border-bottom-left-radius: 18px;
-            border-bottom-right-radius: 18px;
+            width: 110px;
+            height: 28px;
+            background: #1a1a2e;
+            border-radius: 20px;
             z-index: 100;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
         }
 
+        /* ── Light-mode phone screen ───────────────────────── */
         .screen {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #ffffff;
-            padding: 50px 20px 20px 20px;
-            /* Top padding for notch */
+            /* Crisp white-to-light-blue interior — high contrast */
+            background: linear-gradient(175deg, #f8faff 0%, #eef2ff 100%);
+            padding: 55px 20px 20px 20px;
             height: 100%;
             box-sizing: border-box;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
             flex-shrink: 0;
         }
 
         .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
             background: linear-gradient(90deg, #2563eb, #7c3aed);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -0.01em;
         }
 
+        /* ── Chat area ─────────────────────────────────────── */
         .chat-area {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            padding-bottom: 20px;
+            gap: 10px;
+            padding-bottom: 16px;
             scrollbar-width: none;
-            /* Hide scrollbar */
             min-height: 0;
-            /* Important for flex scrolling */
         }
 
         .chat-area::-webkit-scrollbar {
@@ -94,22 +245,19 @@
         }
 
         .message {
-            max-width: 80%;
-            padding: 14px 18px;
-            border-radius: 20px;
-            font-size: 1rem;
-            line-height: 1.5;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            animation: messagePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
+            max-width: 82%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.55;
             flex-shrink: 0;
-            /* Prevent squishing */
+            animation: msgIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
         }
 
-        @keyframes messagePop {
+        @keyframes msgIn {
             from {
                 opacity: 0;
-                transform: scale(0.9) translateY(10px);
+                transform: scale(0.85) translateY(8px);
             }
 
             to {
@@ -118,41 +266,57 @@
             }
         }
 
+        /* Agent: soft card on light bg */
         .agent-msg {
             align-self: flex-start;
-            background-color: #f1f5f9;
-            color: #334155;
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
             border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
+        /* User: vivid gradient */
         .user-msg {
             align-self: flex-end;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
             color: white;
             border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
         }
 
+        /* ── Controls ──────────────────────────────────────── */
         .controls {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: auto;
-            position: relative;
-            padding-top: 20px;
-            background: white;
-            /* Cover content behind */
-            z-index: 10;
+            padding-top: 16px;
+            /* Subtle separator to float above chat */
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            background: rgba(248, 250, 255, 0.95);
+            backdrop-filter: blur(8px);
             flex-shrink: 0;
         }
 
         .status {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #94a3b8;
-            margin-bottom: 20px;
-            height: 1.5em;
+            margin-bottom: 18px;
+            height: 1.4em;
             font-weight: 500;
+            letter-spacing: 0.02em;
+            transition: color 0.3s;
         }
 
+        .status.listening {
+            color: #3b82f6;
+        }
+
+        .status.processing {
+            color: #7c3aed;
+        }
+
+        /* ── PTT ───────────────────────────────────────────── */
         .ptt-wrapper {
             position: relative;
             display: flex;
@@ -160,37 +324,37 @@
             align-items: center;
         }
 
-        /* Pulse Rings */
         .ring {
             position: absolute;
             border-radius: 50%;
             border: 2px solid #3b82f6;
-            width: 80px;
-            height: 80px;
+            width: 96px;
+            height: 96px;
             opacity: 0;
             z-index: 0;
         }
 
         .active .ring {
-            animation: ripple 1.5s infinite;
+            animation: ripple 1.6s ease-out infinite;
         }
 
         .active .ring:nth-child(2) {
-            animation-delay: 0.3s;
+            animation-delay: 0.4s;
+            border-color: #7c3aed;
         }
 
         .active .ring:nth-child(3) {
-            animation-delay: 0.6s;
+            animation-delay: 0.8s;
         }
 
         @keyframes ripple {
             0% {
                 transform: scale(1);
-                opacity: 0.6;
+                opacity: 0.5;
             }
 
             100% {
-                transform: scale(2);
+                transform: scale(2.2);
                 opacity: 0;
             }
         }
@@ -199,66 +363,59 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #3b82f6, #7c3aed);
             border: none;
             color: white;
-            font-size: 32px;
+            font-size: 30px;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+            box-shadow:
+                0 0 0 4px rgba(59, 130, 246, 0.12),
+                0 8px 24px rgba(59, 130, 246, 0.4);
             z-index: 10;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .ptt-btn:active,
         .ptt-btn.active {
-            transform: scale(0.9);
-            background: #1d4ed8;
+            transform: scale(0.92);
+            box-shadow:
+                0 0 0 4px rgba(124, 58, 237, 0.2),
+                0 10px 30px rgba(124, 58, 237, 0.5);
         }
 
         .ptt-btn.disabled {
-            background: #cbd5e1;
+            background: #e2e8f0;
             box-shadow: none;
             cursor: not-allowed;
         }
 
-        /* Sim Switcher */
-        .sim-switcher {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #4b5563;
+        .ptt-btn.processing {
+            animation: processingPulse 1s ease-in-out infinite alternate;
         }
 
-        select {
-            padding: 5px 10px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            font-family: inherit;
-            outline: none;
+        @keyframes processingPulse {
+            from {
+                box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15), 0 8px 24px rgba(124, 58, 237, 0.3);
+            }
+
+            to {
+                box-shadow: 0 0 0 8px rgba(124, 58, 237, 0.05), 0 12px 32px rgba(124, 58, 237, 0.6);
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="sim-switcher">
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <div style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Caller Identity Status</div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <div id="matchParams"
-                    style="padding: 8px 12px; background: #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-weight: 500; color: #475569; width: 100%; text-align: center;">
-                    Unknown Caller
-                </div>
-            </div>
+    <div class="identity-badge" id="identityBadge">
+        <div class="badge-dot" id="badgeDot"></div>
+        <div>
+            <div class="badge-label">Caller Identity</div>
+            <div id="matchParams">Unknown Caller</div>
         </div>
     </div>
 
@@ -269,9 +426,7 @@
                 <div class="logo">CliniCall</div>
             </div>
 
-            <div class="chat-area" id="chatArea">
-                <!-- Messages -->
-            </div>
+            <div class="chat-area" id="chatArea"></div>
 
             <div class="controls">
                 <div id="status" class="status">Hold button to speak</div>
@@ -290,8 +445,9 @@
         const pttWrapper = document.getElementById('pttWrapper');
         const statusDiv = document.getElementById('status');
         const chatArea = document.getElementById('chatArea');
+        const matchParams = document.getElementById('matchParams');
+        const badgeDot = document.getElementById('badgeDot');
 
-        // Smart Matching Logic
         let allPatients = [];
         let matchedPatient = null;
 
@@ -299,13 +455,7 @@
             try {
                 const res = await fetch('/dashboard/patients');
                 allPatients = await res.json();
-                // identifyCaller(); // Run once - no longer needed as there are no inputs
             } catch (e) { console.error("Failed to load patients", e); }
-        }
-
-        function identifyCaller() {
-            // No manual inputs anymore.
-            // This function is now mainly for resetting state or debug.
         }
 
         let conversationHistory = [];
@@ -314,37 +464,20 @@
             chatArea.innerHTML = '';
             conversationHistory = [];
             matchedPatient = null;
-
-            const statusBadge = document.getElementById('matchParams');
-            statusBadge.innerHTML = 'Unknown Caller';
-            statusBadge.style.background = '#e2e8f0';
-            statusBadge.style.color = '#475569';
-
+            matchParams.textContent = 'Unknown Caller';
+            matchParams.classList.remove('identified');
+            badgeDot.classList.remove('identified');
             if (skipGreeting) return;
-
-            // Security greeting - strictly ask for ID
             const greeting = "Hello, this is CliniCall. For security, please state your full name and date of birth.";
-
             addMessage("agent", greeting);
             if ('speechSynthesis' in window) {
                 setTimeout(() => { try { speak(greeting); } catch (e) { } }, 500);
             }
         }
 
-        // Initial Load
-        window.addEventListener('load', () => {
-            loadPatients();
-            resetChat();
-        });
-        if ('speechSynthesis' in window) {
-            setTimeout(() => {
-                try { speak(INITIAL_MSG); } catch (e) { }
-            }, 800);
-        }
+        window.addEventListener('load', () => { loadPatients(); resetChat(); });
 
-        let recognition;
-        let isListening = false;
-        let isProcessing = false;
+        let recognition, isListening = false, isProcessing = false;
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -353,37 +486,34 @@
             recognition.lang = 'en-US';
             let finalTranscript = '';
 
-            recognition.onstart = function () {
+            recognition.onstart = () => {
                 statusDiv.textContent = "Listening...";
+                statusDiv.className = 'status listening';
                 isListening = true;
                 pttBtn.classList.add('active');
                 pttWrapper.classList.add('active');
                 finalTranscript = '';
             };
-
-            recognition.onresult = function (event) {
-                let interimTranscript = '';
+            recognition.onresult = (event) => {
+                let interim = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-                    else interimTranscript += event.results[i][0].transcript;
+                    else interim += event.results[i][0].transcript;
                 }
-                statusDiv.textContent = interimTranscript || "Listening...";
+                statusDiv.textContent = interim || "Listening...";
             };
-
-            recognition.onerror = (event) => { if (event.error !== 'no-speech') statusDiv.textContent = "Error"; };
-
-            recognition.onend = function () {
+            recognition.onerror = (e) => {
+                if (e.error !== 'no-speech') { statusDiv.textContent = "Error"; statusDiv.className = 'status'; }
+            };
+            recognition.onend = () => {
                 isListening = false;
                 pttBtn.classList.remove('active');
                 pttWrapper.classList.remove('active');
-                if (!isProcessing) statusDiv.textContent = "Hold button to speak";
+                if (!isProcessing) { statusDiv.textContent = "Hold button to speak"; statusDiv.className = 'status'; }
             };
 
             const start = () => {
-                if (!isProcessing && !isListening) try {
-                    window.speechSynthesis.cancel();
-                    recognition.start();
-                } catch (e) { }
+                if (!isProcessing && !isListening) try { window.speechSynthesis.cancel(); recognition.start(); } catch (e) { }
             };
             const stop = () => {
                 if (isListening) {
@@ -391,7 +521,7 @@
                     setTimeout(async () => {
                         const text = finalTranscript.trim();
                         if (text) await processQuery(text);
-                        else statusDiv.textContent = "Hold button to speak";
+                        else { statusDiv.textContent = "Hold button to speak"; statusDiv.className = 'status'; }
                     }, 300);
                 }
             };
@@ -401,52 +531,41 @@
             pttBtn.addEventListener('mouseup', stop);
             pttBtn.addEventListener('touchend', (e) => { e.preventDefault(); stop(); });
             pttBtn.addEventListener('mouseleave', () => { if (isListening) stop(); });
-
         } else {
             statusDiv.textContent = "Browser not supported";
         }
 
         async function processQuery(text) {
             isProcessing = true;
-            pttBtn.classList.add('disabled');
+            pttBtn.classList.add('disabled', 'processing');
             statusDiv.textContent = "Thinking...";
+            statusDiv.className = 'status processing';
             addMessage("user", text);
 
-            // Use matched patient phone or unknown
             const currentPhone = matchedPatient ? matchedPatient.phone_number : "555-9999";
-
             try {
                 const response = await fetch('/agent/query', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        phone_number: currentPhone,
-                        query: text,
-                        history: conversationHistory
-                    })
+                    body: JSON.stringify({ phone_number: currentPhone, query: text, history: conversationHistory })
                 });
                 const data = await response.json();
-
-                // Handle identity switch
                 if (data.identified_patient) {
                     const p = data.identified_patient;
-
-                    // Trigger match logic visually
                     matchedPatient = p;
-                    const statusBadge = document.getElementById('matchParams');
-                    statusBadge.innerHTML = `✅ ${p.first_name} ${p.last_name}`;
-                    statusBadge.style.background = '#dcfce7';
-                    statusBadge.style.color = '#166534';
+                    matchParams.textContent = `${p.first_name} ${p.last_name}`;
+                    matchParams.classList.add('identified');
+                    badgeDot.classList.add('identified');
                 }
-
                 addMessage("agent", data.response_text);
                 speak(data.response_text);
             } catch (e) {
                 addMessage("agent", "Connection error.");
             } finally {
                 isProcessing = false;
-                pttBtn.classList.remove('disabled');
+                pttBtn.classList.remove('disabled', 'processing');
                 statusDiv.textContent = "Hold button to speak";
+                statusDiv.className = 'status';
             }
         }
 
@@ -455,21 +574,16 @@
             div.classList.add('message', role === 'user' ? 'user-msg' : 'agent-msg');
             div.textContent = text;
             chatArea.appendChild(div);
-
-            // Add to history
-            conversationHistory.push({ role: role, content: text });
-
-            // Smooth scroll
+            conversationHistory.push({ role, content: text });
             chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
         }
 
         function speak(text) {
             window.speechSynthesis.cancel();
-            // Strip emojis to prevent reading them out
-            const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.rate = 1.6;
-            window.speechSynthesis.speak(utterance);
+            const clean = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '');
+            const utt = new SpeechSynthesisUtterance(clean);
+            utt.rate = 1.6;
+            window.speechSynthesis.speak(utt);
         }
     </script>
 </body>
