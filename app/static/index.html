@@ -303,6 +303,8 @@
             animation: pulseRing 1.5s infinite;
             opacity: 0;
             pointer-events: none;
+            display: none;
+            /* User requested removal "for now" */
         }
 
         @keyframes pulseRing {
@@ -667,7 +669,7 @@
                     shouldListen = false; // Stop listening
                     recognition.stop();
                     processQuery(textToSend);
-                }, 300);
+                }, 800);
             }
         }
 
