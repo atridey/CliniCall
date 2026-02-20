@@ -1,17 +1,19 @@
+from dotenv import load_dotenv
+# Load environment variables immediately
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from dotenv import load_dotenv
 from .database import engine, Base
 from .routers import agent
 
-# Load environment variables
-load_dotenv()
-
-# Create tables
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="CliniCall")
+
+# Create tables on startup
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 app.include_router(agent.router)
 from .routers import dashboard
