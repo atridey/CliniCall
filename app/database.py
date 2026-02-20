@@ -8,12 +8,16 @@ SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 if not SQLALCHEMY_DATABASE_URL:
     SQLALCHEMY_DATABASE_URL = os.getenv("POSTGRES_URL")
 
-# If we are on Vercel (VERCEL=1) and still have no DB URL, fail fast
-if os.getenv("VERCEL") and not SQLALCHEMY_DATABASE_URL:
+# If we are on a non-Windows environment (e.g. Vercel/Linux) and have no DB URL, fail fast
+# This prevents falling back to SQLite which is read-only on Vercel
+if os.name != "nt" and not SQLALCHEMY_DATABASE_URL:
+    # Debug info
+    print("DEBUG: Environment Variables Keys:", list(os.environ.keys()))
     raise RuntimeError("Deployment Error: No DATABASE_URL or POSTGRES_URL found. Please add the 'Vercel Postgres' integration in the Vercel Dashboard.")
 
-# Fallback for local development
+# Fallback for local development (Windows)
 if not SQLALCHEMY_DATABASE_URL:
+    print("WARNING: Using local SQLite database.")
     SQLALCHEMY_DATABASE_URL = "sqlite:///./clinicall.db"
 
 # Vercel provides postgres:// but SQLAlchemy needs postgresql://
