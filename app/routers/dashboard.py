@@ -263,6 +263,16 @@ def send_doctor_message(phone_number: str, payload: MessageCreate, db: Session =
     db.refresh(msg)
     return msg
 
+@router.delete("/messages/{message_id}")
+def delete_message(message_id: int, db: Session = Depends(get_db)):
+    msg = db.query(Message).filter(Message.id == message_id).first()
+    if not msg:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    db.delete(msg)
+    db.commit()
+    return {"status": "success"}
+
 # ── PATCH Endpoints for Patient Data ────────────────────────────────────────
 
 class PatientUpdate(BaseModel):
